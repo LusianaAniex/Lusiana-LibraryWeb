@@ -29,7 +29,7 @@ function useAdminLoans(params: { status?: string; q?: string; page?: number }) {
       };
       if (params.status && params.status !== 'ALL') p.status = params.status;
       if (params.q) p.q = params.q;
-      const { data } = await api.get('/api/loans', { params: p });
+      const { data } = await api.get('/api/admin/loans', { params: p });
       const payload = data?.data;
       if (Array.isArray(payload)) return { loans: payload, totalPages: 1 };
       return {
@@ -47,7 +47,8 @@ function useAdminLoans(params: { status?: string; q?: string; page?: number }) {
 function useReturnLoanAdmin() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (loanId: number) => api.patch(`/api/loans/${loanId}/return`),
+    mutationFn: (loanId: number) =>
+      api.patch(`/api/admin/loans/${loanId}`, { status: 'RETURNED' }),
     onSuccess: () => {
       toast.success('Loan marked as returned');
       qc.invalidateQueries({ queryKey: ['admin-loans'] });

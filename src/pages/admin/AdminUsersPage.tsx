@@ -19,7 +19,7 @@ function useAdminUsers(params: { q?: string; page?: number }) {
         limit: '20',
       };
       if (params.q) p.q = params.q;
-      const { data } = await api.get('/api/users', { params: p });
+      const { data } = await api.get('/api/admin/users', { params: p });
       const payload = data?.data;
       if (Array.isArray(payload)) return { users: payload, totalPages: 1 };
       return {

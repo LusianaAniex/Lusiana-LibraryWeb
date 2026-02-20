@@ -46,54 +46,19 @@ function StatCard({
   );
 }
 
-function useAdminStats() {
-  const books = useQuery({
-    queryKey: ['books', 'admin-count'],
+function useAdminOverview() {
+  return useQuery({
+    queryKey: ['admin-overview'],
     queryFn: async () => {
-      const { data } = await api.get('/api/books', { params: { limit: 1 } });
-      return data?.data?.pagination?.total ?? 0;
+      const { data } = await api.get('/api/admin/overview');
+      // Shape: { data: { totalBooks, totalLoans, totalUsers, overdueLoans, ... } }
+      return data?.data ?? {};
     },
   });
-  const loans = useQuery({
-    queryKey: ['loans', 'admin-count'],
-    queryFn: async () => {
-      const { data } = await api.get('/api/loans', { params: { limit: 1 } });
-      const payload = data?.data;
-      return (
-        payload?.pagination?.total ??
-        (Array.isArray(payload) ? payload.length : 0)
-      );
-    },
-  });
-  const users = useQuery({
-    queryKey: ['users', 'admin-count'],
-    queryFn: async () => {
-      const { data } = await api.get('/api/users', { params: { limit: 1 } });
-      const payload = data?.data;
-      return (
-        payload?.pagination?.total ??
-        (Array.isArray(payload) ? payload.length : 0)
-      );
-    },
-  });
-  const overdue = useQuery({
-    queryKey: ['loans', 'overdue-count'],
-    queryFn: async () => {
-      const { data } = await api.get('/api/loans', {
-        params: { status: 'LATE', limit: 1 },
-      });
-      const payload = data?.data;
-      return (
-        payload?.pagination?.total ??
-        (Array.isArray(payload) ? payload.length : 0)
-      );
-    },
-  });
-  return { books, loans, users, overdue };
 }
 
 export default function AdminDashboardPage() {
-  const { books, loans, users, overdue } = useAdminStats();
+  const { data: overview, isLoading } = useAdminOverview();
 
   return (
     <div className='max-w-5xl mx-auto'>
@@ -105,28 +70,28 @@ export default function AdminDashboardPage() {
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10'>
         <StatCard
           label='Total Books'
-          value={books.isLoading ? undefined : books.data}
+          value={isLoading ? undefined : overview?.totalBooks}
           icon={BookOpen}
           color='bg-blue-50 text-blue-600'
           href='/admin/books'
         />
         <StatCard
           label='Total Loans'
-          value={loans.isLoading ? undefined : loans.data}
+          value={isLoading ? undefined : overview?.totalLoans}
           icon={FileText}
           color='bg-emerald-50 text-emerald-600'
           href='/admin/loans'
         />
         <StatCard
           label='Registered Users'
-          value={users.isLoading ? undefined : users.data}
+          value={isLoading ? undefined : overview?.totalUsers}
           icon={Users}
           color='bg-violet-50 text-violet-600'
           href='/admin/users'
         />
         <StatCard
           label='Overdue Loans'
-          value={overdue.isLoading ? undefined : overdue.data}
+          value={isLoading ? undefined : overview?.overdueLoans}
           icon={AlertTriangle}
           color='bg-red-50 text-red-600'
           href='/admin/loans?status=LATE'

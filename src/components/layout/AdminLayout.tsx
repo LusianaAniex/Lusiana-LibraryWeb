@@ -5,6 +5,7 @@ import {
   BookOpen,
   Users,
   FileText,
+  Tag,
   ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -14,6 +15,7 @@ const navItems = [
   { label: 'Books', href: '/admin/books', icon: BookOpen },
   { label: 'Loans', href: '/admin/loans', icon: FileText },
   { label: 'Users', href: '/admin/users', icon: Users },
+  { label: 'Categories', href: '/admin/categories', icon: Tag },
 ];
 
 export default function AdminLayout() {

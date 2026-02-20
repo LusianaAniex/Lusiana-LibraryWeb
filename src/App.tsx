@@ -22,6 +22,9 @@ const AdminDashboardPage = lazy(
 const BookListPage = lazy(() => import('@/pages/admin/BookListPage'));
 const AdminLoansPage = lazy(() => import('@/pages/admin/AdminLoansPage'));
 const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage'));
+const AdminCategoriesPage = lazy(
+  () => import('@/pages/admin/AdminCategoriesPage')
+);
 
 function PageLoader() {
   return (
@@ -75,6 +78,7 @@ function App() {
             <Route path='books' element={<BookListPage />} />
             <Route path='loans' element={<AdminLoansPage />} />
             <Route path='users' element={<AdminUsersPage />} />
+            <Route path='categories' element={<AdminCategoriesPage />} />
           </Route>
 
           {/* Catch-all */}
