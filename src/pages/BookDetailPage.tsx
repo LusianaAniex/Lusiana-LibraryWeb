@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBookDetail, useBorrowBook } from '@/hooks/useBookDetail';
+import { useAddToCart } from '@/hooks/useCart';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/store/store';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   ChevronLeft,
   BookOpen,
+  ShoppingCart,
   User as UserIcon,
   Calendar,
 } from 'lucide-react';
@@ -22,6 +24,7 @@ export default function BookDetailPage() {
 
   const { data: book, isLoading, error } = useBookDetail(id);
   const borrowBook = useBorrowBook();
+  const addToCart = useAddToCart();
 
   const handleBorrow = () => {
     if (!book) return;
@@ -141,6 +144,18 @@ export default function BookDetailPage() {
                     ? 'Borrow Book'
                     : 'Unavailable'}
               </Button>
+              {isAuthenticated && isAvailable && (
+                <Button
+                  size='lg'
+                  variant='outline'
+                  className='w-full font-semibold active:scale-95 transition-all'
+                  disabled={addToCart.isPending}
+                  onClick={() => book && addToCart.mutate(book.id)}
+                >
+                  <ShoppingCart className='mr-2 h-4 w-4' />
+                  {addToCart.isPending ? 'Adding…' : 'Add to Cart'}
+                </Button>
+              )}
               {!isAuthenticated && (
                 <p className='text-xs text-neutral-400'>
                   Sign in to borrow this book

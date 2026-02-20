@@ -29,6 +29,7 @@ import { Loader2, Upload, X, ImageIcon } from 'lucide-react';
 const bookSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   authorName: z.string().min(1, 'Author is required'),
+  isbn: z.string().min(1, 'ISBN is required'),
   categoryId: z.string().min(1, 'Category is required'), // stored as string in form, parsed to number
   publishedYear: z.string().regex(/^\d{4}$/, 'Must be a valid year'), // input as string
   totalCopies: z.string().regex(/^\d+$/, 'Must be a number'),
@@ -65,6 +66,7 @@ export default function BookFormDialog({
     defaultValues: {
       title: '',
       authorName: '',
+      isbn: '',
       categoryId: '',
       publishedYear: new Date().getFullYear().toString(),
       totalCopies: '1',
@@ -92,6 +94,7 @@ export default function BookFormDialog({
       reset({
         title: book.title,
         authorName: book.author?.name || '',
+        isbn: book.isbn || '',
         categoryId: book.categoryId.toString(),
         publishedYear: (
           book.publishedYear || new Date().getFullYear()
@@ -104,6 +107,7 @@ export default function BookFormDialog({
       reset({
         title: '',
         authorName: '',
+        isbn: '',
         categoryId: '',
         publishedYear: new Date().getFullYear().toString(),
         totalCopies: '1',
@@ -119,7 +123,7 @@ export default function BookFormDialog({
       categoryId: parseInt(values.categoryId),
       publishedYear: parseInt(values.publishedYear),
       totalCopies: parseInt(values.totalCopies),
-      isbn: '000-0000000000', // Mock ISBN if missing
+      isbn: values.isbn,
       coverImage: values.coverImage || '',
     };
 
@@ -230,6 +234,19 @@ export default function BookFormDialog({
               <p className='text-xs text-red-500'>
                 {errors.authorName.message}
               </p>
+            )}
+          </div>
+
+          {/* ISBN */}
+          <div className='space-y-2'>
+            <Label htmlFor='isbn'>ISBN</Label>
+            <Input
+              id='isbn'
+              placeholder='e.g. 978-3-16-148410-0'
+              {...register('isbn')}
+            />
+            {errors.isbn && (
+              <p className='text-xs text-red-500'>{errors.isbn.message}</p>
             )}
           </div>
 

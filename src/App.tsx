@@ -14,6 +14,8 @@ const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
 const BookDetailPage = lazy(() => import('@/pages/BookDetailPage'));
 const MyLoansPage = lazy(() => import('@/pages/MyLoansPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
+const CartPage = lazy(() => import('@/pages/CartPage'));
+const CheckoutPage = lazy(() => import('@/pages/CheckoutPage'));
 
 // Admin pages
 const AdminDashboardPage = lazy(
@@ -60,6 +62,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/cart'
+              element={
+                <ProtectedRoute>
+                  <CartPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/checkout'
+              element={
+                <ProtectedRoute>
+                  <CheckoutPage />
                 </ProtectedRoute>
               }
             />

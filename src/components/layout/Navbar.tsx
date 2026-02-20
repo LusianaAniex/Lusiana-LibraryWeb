@@ -1,6 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '@/hooks/useAppDispatch';
+import { useAppSelector } from '@/hooks/useAppDispatch';
 import { useLogout } from '@/hooks/useAuth';
+import { useQuery } from '@tanstack/react-query';
+import { useCartCount } from '@/hooks/useCart';
+import { api } from '@/lib/axios';
 import {
   Search,
   Menu,
@@ -9,10 +12,11 @@ import {
   User,
   LogOut,
   LayoutDashboard,
+  ShoppingCart,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,15 +25,39 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { setSearchQuery } from '@/store/uiSlice';
 
+// Live profile — same ['me'] key as ProfilePage so the cache is shared
+function useLiveProfile() {
+  const { token } = useAppSelector((state) => state.auth);
+  return useQuery({
+    queryKey: ['me'],
+    queryFn: async () => {
+      const { data } = await api.get('/api/me');
+      return data?.data?.profile ?? null;
+    },
+    staleTime: 30_000,
+    enabled: !!token,
+  });
+}
+
 export default function Navbar() {
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, user: reduxUser } = useAppSelector(
+    (state) => state.auth
+  );
   const searchQuery = useAppSelector((state) => state.ui.searchQuery);
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const logout = useLogout();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Live profile for up-to-date avatar / name
+  const { data: liveProfile } = useLiveProfile();
+  const profile = liveProfile ?? reduxUser;
+
+  // Cart badge
+  const cartCount = useCartCount();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setSearchQuery(e.target.value));
@@ -37,10 +65,11 @@ export default function Navbar() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
+    const q = (searchQuery ?? '').trim();
+    if (q) navigate(`/?q=${encodeURIComponent(q)}`);
   };
+
+  const initial = profile?.name?.charAt(0)?.toUpperCase() ?? 'U';
 
   return (
     <header className='sticky top-0 z-50 border-b border-neutral-200 bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/80'>
@@ -68,19 +97,41 @@ export default function Navbar() {
         </form>
 
         {/* Right side */}
-        <div className='flex items-center gap-3'>
-          {/* Mobile search button */}
+        <div className='flex items-center gap-2'>
+          {/* Mobile search */}
           <button className='sm:hidden p-2 text-neutral-500 hover:text-neutral-700'>
             <Search size={20} />
           </button>
+
+          {isAuthenticated && (
+            /* Cart icon with badge */
+            <button
+              onClick={() => navigate('/cart')}
+              className='relative p-2 text-neutral-500 hover:text-neutral-700 transition-colors'
+              title='My Cart'
+            >
+              <ShoppingCart size={22} />
+              {cartCount > 0 && (
+                <span className='absolute -top-0.5 -right-0.5 h-4.5 min-w-4.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1 leading-none'>
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </button>
+          )}
 
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className='flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 cursor-pointer'>
                   <Avatar className='h-9 w-9 border-2 border-primary-200'>
+                    {profile?.profilePhoto && (
+                      <AvatarImage
+                        src={profile.profilePhoto}
+                        alt={profile?.name ?? 'User'}
+                      />
+                    )}
                     <AvatarFallback className='bg-primary-50 text-primary-600 font-semibold text-sm'>
-                      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                      {initial}
                     </AvatarFallback>
                   </Avatar>
                 </button>
@@ -88,9 +139,9 @@ export default function Navbar() {
               <DropdownMenuContent align='end' className='w-48'>
                 <div className='px-2 py-1.5'>
                   <p className='text-sm font-medium text-neutral-900'>
-                    {user?.name}
+                    {profile?.name}
                   </p>
-                  <p className='text-xs text-neutral-500'>{user?.email}</p>
+                  <p className='text-xs text-neutral-500'>{profile?.email}</p>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -107,7 +158,14 @@ export default function Navbar() {
                   <BookOpen className='mr-2 h-4 w-4' />
                   My Loans
                 </DropdownMenuItem>
-                {user?.role === 'ADMIN' && (
+                <DropdownMenuItem
+                  onClick={() => navigate('/cart')}
+                  className='cursor-pointer'
+                >
+                  <ShoppingCart className='mr-2 h-4 w-4' />
+                  My Cart
+                </DropdownMenuItem>
+                {profile?.role === 'ADMIN' && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -190,6 +248,21 @@ export default function Navbar() {
                 className='flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50'
               >
                 <BookOpen size={16} /> My Loans
+              </button>
+              <button
+                onClick={() => {
+                  navigate('/cart');
+                  setMobileMenuOpen(false);
+                }}
+                className='flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50'
+              >
+                <ShoppingCart size={16} />
+                My Cart
+                {cartCount > 0 && (
+                  <span className='ml-auto text-xs bg-red-500 text-white rounded-full px-1.5 py-0.5 font-bold'>
+                    {cartCount}
+                  </span>
+                )}
               </button>
               <button
                 onClick={() => {
