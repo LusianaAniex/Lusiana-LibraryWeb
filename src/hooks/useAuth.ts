@@ -14,7 +14,7 @@ export function useLogin() {
   return useMutation({
     mutationFn: async (data: LoginRequest) => {
       const response = await api.post('/api/auth/login', data);
-      // Backend: { success, message, data: { user, token } }
+      // Confirmed shape: { success, message, data: { token, user: { id, name, email, ... } } }
       const payload = response.data?.data ?? response.data;
       return payload as LoginResponse;
     },

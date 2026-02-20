@@ -8,13 +8,13 @@ export function useProfileStats() {
     queryKey: ['profile-stats'],
     queryFn: async () => {
       const { data } = await api.get('/api/me');
-      // Backend: { success, message, data: { ...userWithStats } }
-      const user = data?.data;
+      // Confirmed shape: { data: { profile: {...}, loanStats: { borrowed, late, returned, total }, reviewsCount } }
+      const stats = data?.data?.loanStats;
       return {
-        totalBorrowed: user?.totalBorrowed ?? user?.borrowCount ?? 0,
-        activeLoans: user?.activeLoans ?? 0,
-        reviewsWritten: user?.reviewsWritten ?? user?.reviewCount ?? 0,
-        averageRating: user?.averageRating ?? 0,
+        totalBorrowed: stats?.total ?? 0,
+        activeLoans: stats?.borrowed ?? 0,
+        reviewsWritten: data?.data?.reviewsCount ?? 0,
+        averageRating: 0,
       };
     },
   });
@@ -38,13 +38,13 @@ export function useMyReviews() {
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (body: Partial<User>) => {
+    mutationFn: async (body: Partial<User> & { profilePhoto?: string }) => {
       return api.patch('/api/me', body);
     },
-    onSuccess: (response) => {
+    onSuccess: () => {
       toast.success('Profile updated successfully');
-      queryClient.setQueryData(['auth_user'], response.data?.data);
-      queryClient.invalidateQueries({ queryKey: ['profile-stats'] });
+      // Refresh the ProfilePage live-user query
+      queryClient.invalidateQueries({ queryKey: ['me'] });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to update profile');
