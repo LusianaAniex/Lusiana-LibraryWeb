@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  /* --- 1. Typography: Font Family --- */
+  --font-quicksand: "Quicksand", sans-serif;
+  --font-sans: var(--font-quicksand); /* Sets Quicksand as the default font */
+
+  /* --- 2. Typography: Scale --- */
+  /* Display 3xl */
+  --text-display-3xl: 3.75rem; /* 60px */
+  --text-display-3xl--line-height: 4.5rem; /* 72px */
+
+  /* Display 2xl (Use with tracking-tight-2) */
+  --text-display-2xl: 3rem; /* 48px */
+  --text-display-2xl--line-height: 3.75rem; /* 60px */
+
+  /* Display xl (Use with tracking-tight-2) */
+  --text-display-xl: 2.5rem; /* 40px */
+  --text-display-xl--line-height: 3rem; /* 48px */
+
+  /* Display lg (Use with tracking-tight-2) */
+  --text-display-lg: 2.25rem; /* 36px */
+  --text-display-lg--line-height: 2.75rem; /* 44px */
+
+  /* Display md */
+  --text-display-md: 2rem; /* 32px */
+  --text-display-md--line-height: 2.5rem; /* 40px */
+
+  /* Display sm */
+  --text-display-sm: 1.75rem; /* 28px */
+  --text-display-sm--line-height: 2.375rem; /* 38px */
+
+  /* Display xs */
+  --text-display-xs: 1.5rem; /* 24px */
+  --text-display-xs--line-height: 2.25rem; /* 36px */
+
+  /* Text xl */
+  --text-xl: 1.25rem; /* 20px */
+  --text-xl--line-height: 2.125rem; /* 34px */
+
+  /* Text lg */
+  --text-lg: 1.125rem; /* 18px */
+  --text-lg--line-height: 2rem; /* 32px */
+
+  /* Text md (Base) */
+  --text-md: 1rem; /* 16px */
+  --text-md--line-height: 1.875rem; /* 30px */
+
+  /* Text sm */
+  --text-sm: 0.875rem; /* 14px */
+  --text-sm--line-height: 1.75rem; /* 28px */
+
+  /* Text xs */
+  --text-xs: 0.75rem; /* 12px */
+  --text-xs--line-height: 1.5rem; /* 24px */
+
+  /* Custom Letter Spacing */
+  --tracking-tight-2: -0.02em; /* -2% spacing */
+
+  /* --- 3. Colors: Neutral (Gray) --- */
+  --color-neutral-25: #FDFDFD;
+  --color-neutral-50: #FAFAFA;
+  --color-neutral-100: #F5F5F5;
+  --color-neutral-200: #E9EAEB;
+  --color-neutral-300: #D5D7DA;
+  --color-neutral-400: #A4A7AE;
+  --color-neutral-500: #717680;
+  --color-neutral-600: #535862;
+  --color-neutral-700: #414651;
+  --color-neutral-800: #252B37;
+  --color-neutral-900: #181D27;
+  --color-neutral-950: #0A0D12;
+
+  /* --- 4. Colors: Primary (Blue) --- */
+  /* Defined based on the 3 shades provided */
+  --color-primary-50: #F6F9FE;
+  --color-primary-200: #D2E3FF;
+  --color-primary-600: #1C65DA;
+  --color-primary: #1C65DA; /* Default primary */
+
+  /* --- 5. Colors: Accent --- */
+  --color-accent-red: #D9206E;
+  --color-accent-green: #079455;
+  --color-accent-yellow: #FDB022;
+}
+
+/* --- Utility Aliases (Optional) --- */
+/* Makes it easier to apply the specific tracking to the headers automatically */
+@layer utilities {
+  .text-display-2xl, .text-display-xl, .text-display-lg {
+    letter-spacing: var(--tracking-tight-2);
+  }
+}
