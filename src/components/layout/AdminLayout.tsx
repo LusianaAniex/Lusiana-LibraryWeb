@@ -6,12 +6,14 @@ import {
   Users,
   FileText,
   Tag,
+  PenTool,
   ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard, exact: true },
+  { label: 'Authors', href: '/admin/authors', icon: PenTool },
   { label: 'Books', href: '/admin/books', icon: BookOpen },
   { label: 'Loans', href: '/admin/loans', icon: FileText },
   { label: 'Users', href: '/admin/users', icon: Users },

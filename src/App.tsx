@@ -12,6 +12,7 @@ import './App.css';
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
 const BookDetailPage = lazy(() => import('@/pages/BookDetailPage'));
+const AuthorDetailPage = lazy(() => import('@/pages/AuthorDetailPage'));
 const MyLoansPage = lazy(() => import('@/pages/MyLoansPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const CartPage = lazy(() => import('@/pages/CartPage'));
@@ -27,6 +28,7 @@ const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage'));
 const AdminCategoriesPage = lazy(
   () => import('@/pages/admin/AdminCategoriesPage')
 );
+const AdminAuthorsPage = lazy(() => import('@/pages/admin/AdminAuthorsPage'));
 
 function PageLoader() {
   return (
@@ -49,6 +51,7 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path='/' element={<HomePage />} />
             <Route path='/books/:id' element={<BookDetailPage />} />
+            <Route path='/authors/:id' element={<AuthorDetailPage />} />
             <Route
               path='/my-loans'
               element={
@@ -93,6 +96,7 @@ function App() {
             }
           >
             <Route index element={<AdminDashboardPage />} />
+            <Route path='authors' element={<AdminAuthorsPage />} />
             <Route path='books' element={<BookListPage />} />
             <Route path='loans' element={<AdminLoansPage />} />
             <Route path='users' element={<AdminUsersPage />} />

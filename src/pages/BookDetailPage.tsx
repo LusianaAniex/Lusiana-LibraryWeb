@@ -14,6 +14,7 @@ import {
   User as UserIcon,
   Calendar,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import StarRating from '@/components/books/StarRating';
 import ReviewSection from '@/components/books/ReviewSection';
 
@@ -189,7 +190,16 @@ export default function BookDetailPage() {
                 <div className='h-8 w-8 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-500'>
                   <UserIcon size={16} />
                 </div>
-                {book.author?.name || 'Unknown Author'}
+                {book.authorId ? (
+                  <Link
+                    to={`/authors/${book.authorId}`}
+                    className='text-primary-600 hover:text-primary-700 hover:underline transition-colors'
+                  >
+                    {book.author?.name || 'Unknown Author'}
+                  </Link>
+                ) : (
+                  <span>{book.author?.name || 'Unknown Author'}</span>
+                )}
               </div>
               <div className='w-px h-4 bg-neutral-300' />
               <div className='flex items-center gap-2'>
