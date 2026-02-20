@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/axios';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -112,6 +112,13 @@ export default function AdminUsersPage() {
                   <td className='px-4 py-3'>
                     <div className='flex items-center gap-3'>
                       <Avatar className='h-9 w-9 border border-neutral-200'>
+                        {(user as any).profilePhoto && (
+                          <AvatarImage
+                            src={(user as any).profilePhoto}
+                            alt={user.name}
+                            className='object-cover'
+                          />
+                        )}
                         <AvatarFallback className='bg-primary-50 text-primary-700 font-semibold text-sm'>
                           {user.name?.charAt(0)?.toUpperCase() ?? '?'}
                         </AvatarFallback>
