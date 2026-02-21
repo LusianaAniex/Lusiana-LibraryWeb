@@ -70,6 +70,15 @@ export default function BookListPage() {
   const books = booksQuery.data?.books ?? [];
   const totalPages = booksQuery.data?.totalPages ?? 1;
 
+  const filteredBooks = books.filter((book) => {
+    if (statusFilter === 'All') return true;
+    if (statusFilter === 'Available') return book.availableCopies > 0;
+    if (statusFilter === 'Borrowed') return book.availableCopies <= 0;
+    if (statusFilter === 'Returned')
+      return book.borrowCount > 0 && book.availableCopies === book.totalCopies;
+    return true;
+  });
+
   const handleEdit = (book: Book) => {
     setSelectedBook(book);
     setIsFormOpen(true);
@@ -172,14 +181,14 @@ export default function BookListPage() {
                     </div>
                   </td>
                 </tr>
-              ) : books.length === 0 ? (
+              ) : filteredBooks.length === 0 ? (
                 <tr>
                   <td colSpan={3} className='p-12 text-center text-neutral-500'>
                     No books found.
                   </td>
                 </tr>
               ) : (
-                books.map((book) => (
+                filteredBooks.map((book) => (
                   <tr
                     key={book.id}
                     className='hover:bg-neutral-50 transition-colors'
