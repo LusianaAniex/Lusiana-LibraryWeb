@@ -25,6 +25,7 @@ dist-ssr
 *.sw?
 
 # Test files
+
 *.test.js
 *.spec.js
 __tests__/
@@ -34,3 +35,4 @@ mock-*.js
 *.txt
 
 APIDOCS.md 
+lint_results.json

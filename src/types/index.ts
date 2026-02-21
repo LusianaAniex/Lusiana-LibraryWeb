@@ -143,13 +143,22 @@ export interface LoanFilters {
 }
 
 // ── Admin ─────────────────────────────────────────────────
-export interface BookInput {
-  title: string;
+export type BookInput = Omit<
+  Book,
+  | 'id'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'author'
+  | 'category'
+  | 'reviews'
+  | 'availableCopies'
+  | 'borrowCount'
+  | 'reviewCount'
+  | 'rating'
+  | 'authorId'
+> & {
   authorName: string;
-  categoryId: number;
-  isbn: string;
-  publishedYear: number;
-  totalCopies: number;
   description: string;
   coverImage: string;
-}
+  publishedYear: number;
+};

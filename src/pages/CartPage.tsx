@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart, useRemoveCartItem } from '@/hooks/useCart';
 import { Button } from '@/components/ui/button';
@@ -49,30 +49,30 @@ export default function CartPage() {
 
   const allSelected = items.length > 0 && validSelected.size === items.length;
 
-  const toggleAll = () => {
+  const toggleAll = useCallback(() => {
     if (allSelected) {
       setSelected(new Set());
     } else {
       setSelected(new Set(items.map((i) => i.id)));
     }
-  };
+  }, [allSelected, items]);
 
-  const toggleItem = (id: number) => {
+  const toggleItem = useCallback((id: number) => {
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
-  };
+  }, []);
 
-  const handleBorrow = () => {
+  const handleBorrow = useCallback(() => {
     const itemIds = [...validSelected];
     if (itemIds.length === 0) return;
     navigate('/checkout', {
       state: { itemIds, items: items.filter((i) => itemIds.includes(i.id)) },
     });
-  };
+  }, [validSelected, items, navigate]);
 
   if (isLoading) {
     return (

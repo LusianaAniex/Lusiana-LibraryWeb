@@ -68,18 +68,49 @@ export function useBorrowBook() {
     mutationFn: async (bookId: number) => {
       return api.post('/api/loans', { bookId });
     },
-    onSuccess: (_, bookId) => {
+    onMutate: async (bookId: number) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['book', String(bookId)] });
+
+      // Snapshot previous data
+      const previousBook = queryClient.getQueryData<Book>([
+        'book',
+        String(bookId),
+      ]);
+
+      // Optimistically update
+      if (previousBook) {
+        queryClient.setQueryData<Book>(['book', String(bookId)], {
+          ...previousBook,
+          availableCopies: Math.max(0, previousBook.availableCopies - 1),
+        });
+      }
+
+      return { previousBook };
+    },
+    onSuccess: () => {
       toast.success('Book borrowed successfully!');
-      queryClient.invalidateQueries({ queryKey: ['book', String(bookId)] });
       queryClient.invalidateQueries({ queryKey: ['my-loans'] });
     },
-    onError: (error: Error) => {
+    onError: (error: Error, bookId, context) => {
       const axiosError = error as import('axios').AxiosError<{
         message?: string;
       }>;
       toast.error(
         axiosError.response?.data?.message || 'Failed to borrow book'
       );
+
+      // Rollback if error
+      if (context?.previousBook) {
+        queryClient.setQueryData(
+          ['book', String(bookId)],
+          context.previousBook
+        );
+      }
+    },
+    onSettled: (_, __, bookId) => {
+      // sync with server
+      queryClient.invalidateQueries({ queryKey: ['book', String(bookId)] });
     },
   });
 }

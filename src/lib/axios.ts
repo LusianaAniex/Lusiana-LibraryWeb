@@ -22,20 +22,20 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Helper to sanitize blob URLs locally so they don't break frontend mapping
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const sanitizeBlobUrls = (data: any) => {
-  // eslint-disable-line @typescript-eslint/no-explicit-any
   if (!data || typeof data !== 'object') return;
   if (Array.isArray(data)) {
     data.forEach(sanitizeBlobUrls);
   } else {
-    for (const key in data) {
-      if (typeof data[key] === 'string' && data[key].startsWith('blob:')) {
+    Object.keys(data).forEach((key) => {
+      const value = data[key];
+      if (typeof value === 'string' && value.startsWith('blob:')) {
         data[key] = ''; // Change to empty string so fallback UI triggers
-      } else if (typeof data[key] === 'object') {
-        sanitizeBlobUrls(data[key]);
+      } else if (typeof value === 'object') {
+        sanitizeBlobUrls(value);
       }
-    }
+    });
   }
 };
 
