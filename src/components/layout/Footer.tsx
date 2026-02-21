@@ -10,14 +10,14 @@ export default function Footer() {
           </div>
 
           {/* Description */}
-          <p className='text-sm text-neutral-500 max-w-md mb-6'>
-            Discover books, grow your knowledge, reach far beyond. This library
-            is open for everyone to read & learn.
+          <p className='text-sm md:text-md font-semibold text-neutral-950 max-w-sm md:max-w-4xl mb-6'>
+            Discover inspiring stories & timeless knowledge, ready to borrow
+            anytime. Explore online or visit our nearest library branch.
           </p>
 
-          <p className='text-xs text-neutral-400 mb-4'>
-            Follow us on Social Media
-          </p>
+          <h3 className='text-md font-bold text-neutral-950 mb-6'>
+            Follow on Social Media
+          </h3>
 
           {/* Social links */}
           <div className='flex items-center gap-4'>
@@ -30,10 +30,14 @@ export default function Footer() {
               <a
                 key={social.label}
                 href='#'
-                className='flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 transition-colors hover:border-primary-600'
+                className='flex h-14 w-14 items-center justify-center rounded-full border-2 border-neutral-200 transition-colors hover:border-neutral-300 hover:bg-neutral-50'
                 aria-label={social.label}
               >
-                <img src={social.icon} alt={social.label} className='h-4 w-4' />
+                <img
+                  src={social.icon}
+                  alt={social.label}
+                  className='h-6 w-6 brightness-0'
+                />
               </a>
             ))}
           </div>

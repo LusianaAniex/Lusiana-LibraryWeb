@@ -1,100 +1,58 @@
-# React + TypeScript + Vite
+# Booky Web Application 📚
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Welcome to **Booky**, a modern library management and book exploration web application! This guide will help you understand how to navigate and use the platform.
 
-Currently, two official plugins are available:
+## 🚀 Getting Started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+To explore Booky, simply open the application in your browser. The platform is designed to be intuitive for both casual readers and administrators.
 
-## React Compiler
+### 📖 For Readers (Users)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+As a regular user, you have access to a rich catalog of books and community features:
 
-## Expanding the ESLint configuration
+1. **Browse & Search**
+   - **Home Page**: Discover highlighted books, browse by popular categories, see latest additions, and locate popular authors.
+   - **Book Explorer (`/books`)**: Use the dedicated exploration page to search for specific titles and filter results by Category or Rating. The interface is fully responsive, offering a sidebar on desktop and a slide-out drawer on mobile.
+   - **Search Bar**: The top navigation bar allows you to quickly search for books from anywhere in the app. **Search Functionality**: Type in the top navigation search bar and press enter. It should navigate to /books?q=[text] and filter the list accordingly.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+2. **Book Details & Engagement**
+   - **Book Pages**: Click on any book to see its full synopsis, availability (total and available copies), and author information.
+   - **Reviews**: Read reviews from other users and leave your own 1-5 star rating and comment (requires login).
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+3. **Borrowing & Cart**
+   - **Add to Cart**: If a book has available copies, add it to your cart.
+   - **Checkout**: Once ready, proceed to your cart to confirm your borrowing request.
+   - **My Loans (`/my-loans`)**: Track your active, overdue, and returned books directly from your profile.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+4. **User Profile**
+   - **Profile Management (`/profile`)**: Update your personal details and upload a custom profile avatar.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 🛡️ For Administrators (Admins)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Administrators have access to a powerful backend dashboard to manage the library's ecosystem.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-src/
-├── assets/              # Static images (Booky logo, illustrations)
-├── components/
-│   ├── ui/              # shadcn components (Button, Input, etc.)
-│   ├── layout/          # Navbar, Footer, MainLayout
-│   └── fragments/       # Reusable chunks (BookCard, ReviewItem)
-├── features/            # Feature-specific logic
-│   ├── auth/            # Login/Register forms, protection logic
-│   └── books/           # Book list, borrowing logic
-├── hooks/               # Custom React hooks (useDebounce, etc.)
-├── lib/                 # Utilities
-│   ├── axios.ts         # Axios instance with interceptors
-│   └── utils.ts         # Tailwind class merger (cn)
-├── pages/               # Page views (matches your Route list)
-│   ├── HomePage.tsx
-│   ├── LoginPage.tsx
-│   ├── RegisterPage.tsx
-│   ├── BookDetailPage.tsx
-│   ├── MyLoansPage.tsx
-│   └── ProfilePage.tsx
-├── store/               # Redux State [cite: 15]
-│   ├── store.ts         # Main store configuration
-│   ├── authSlice.ts     # Token & User state [cite: 18]
-│   └── uiSlice.ts       # Global UI state (filters, search) [cite: 19]
-├── types/               # TypeScript interfaces (Book, User, Loan)
-├── App.tsx              # Routing Setup
-└── main.tsx             # Providers (Redux, Query, Router) wrap here
+1. **Admin Dashboard (`/admin`)**
+   - Access the dashboard via the dropdown menu on your profile avatar (if you have an `ADMIN` role).
+   - View high-level statistics: Total Books, Total Loans, User count, and Revenue/Penalty metrics.
+
+2. **Inventory Management**
+   - **Books (`/admin/books`)**: Add new books, update stock, and manage existing titles.
+   - **Authors (`/admin/authors`)**: Create and edit author profiles, including uploading their profile photos and writing their biographies so users can learn more about them.
+   - **Categories (`/admin/categories`)**: Manage the genres and categorizations available in the system.
+
+3. **User & Loan Management**
+   - **Users (`/admin/users`)**: Monitor registered users and their roles.
+   - **Loans (`/admin/loans`)**: Track all borrowing activity across the platform, mark books as returned, and monitor overdue items.
+
+## 🛠️ Technical Overview
+
+Booky is built with a modern, responsive stack:
+
+- **Frontend**: React, TypeScript, Vite
+- **Styling**: Tailwind CSS, shadcn/ui components
+- **State Management**: Redux Toolkit (auth/ui state), React Query (server state & caching)
+- **Routing**: React Router DOM
+
+Enjoy exploring the world of books with Booky!
