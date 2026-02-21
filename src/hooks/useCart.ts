@@ -32,8 +32,13 @@ export function useAddToCart() {
       toast.success('Added to cart');
       queryClient.invalidateQueries({ queryKey: ['cart'] });
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to add to cart');
+    onError: (error: Error) => {
+      const axiosError = error as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to add to cart'
+      );
     },
   });
 }
@@ -49,8 +54,13 @@ export function useRemoveCartItem() {
       toast.success('Removed from cart');
       queryClient.invalidateQueries({ queryKey: ['cart'] });
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to remove item');
+    onError: (error: Error) => {
+      const axiosError = error as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to remove item'
+      );
     },
   });
 }
@@ -65,8 +75,11 @@ export function useClearCart() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to clear cart');
+    onError: (error: Error) => {
+      const axiosError = error as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(axiosError.response?.data?.message || 'Failed to clear cart');
     },
   });
 }
@@ -91,8 +104,13 @@ export function useBorrowFromCart() {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
       queryClient.invalidateQueries({ queryKey: ['my-loans'] });
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to confirm borrow');
+    onError: (error: Error) => {
+      const axiosError = error as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to confirm borrow'
+      );
     },
   });
 }

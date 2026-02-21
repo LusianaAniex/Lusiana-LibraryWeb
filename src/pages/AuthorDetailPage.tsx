@@ -67,9 +67,9 @@ export default function AuthorDetailPage() {
         <div className='max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8'>
           <div className='flex flex-col md:flex-row items-center md:items-start gap-6'>
             <div className='h-32 w-32 shrink-0 overflow-hidden rounded-full border-4 border-white shadow-md bg-neutral-100'>
-              {(author as any).profilePhoto ? (
+              {author.profilePhoto ? (
                 <img
-                  src={(author as any).profilePhoto}
+                  src={author.profilePhoto}
                   alt={author.name}
                   className='h-full w-full object-cover'
                 />

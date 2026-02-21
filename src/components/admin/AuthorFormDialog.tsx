@@ -61,7 +61,7 @@ export default function AuthorFormDialog({
       reset({
         name: author.name,
         bio: author.bio || '',
-        profilePhoto: (author as any).profilePhoto || '', // type has bio, name
+        profilePhoto: author.profilePhoto || '', // type has bio, name
       });
     } else {
       reset({

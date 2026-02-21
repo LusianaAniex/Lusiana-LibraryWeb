@@ -46,8 +46,13 @@ export function useUpdateProfile() {
       // Refresh the ProfilePage live-user query
       queryClient.invalidateQueries({ queryKey: ['me'] });
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to update profile');
+    onError: (error: Error) => {
+      const axiosError = error as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to update profile'
+      );
     },
   });
 }

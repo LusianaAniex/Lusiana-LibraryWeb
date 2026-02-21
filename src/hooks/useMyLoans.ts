@@ -28,8 +28,13 @@ export function useReturnBook() {
       toast.success('Book returned successfully');
       queryClient.invalidateQueries({ queryKey: ['my-loans'] });
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to return book');
+    onError: (error: Error) => {
+      const axiosError = error as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to return book'
+      );
     },
   });
 }

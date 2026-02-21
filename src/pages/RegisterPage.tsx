@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useRegister } from '@/hooks/useAuth';
+import { type AxiosError } from 'axios';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,9 +32,10 @@ export default function RegisterPage() {
         onSuccess: () => {
           toast.success('Account created! Please login.');
         },
-        onError: (error: any) => {
+        onError: (error: Error) => {
+          const axiosError = error as AxiosError<{ message?: string }>;
           toast.error(
-            error.response?.data?.message ||
+            axiosError.response?.data?.message ||
               'Registration failed. Please try again.'
           );
         },

@@ -19,7 +19,7 @@ import { Camera, Clock, Calendar, Loader2 } from 'lucide-react';
 import StarRating from '@/components/books/StarRating';
 import { GiveReviewModal } from '@/components/books/GiveReviewModal';
 import { Search } from 'lucide-react';
-import type { Loan, Book } from '@/types';
+import type { Loan, Book, User } from '@/types';
 
 // ── Fetch current user from /api/me (with Redux user as stable placeholder) ──
 function useMe() {
@@ -159,7 +159,7 @@ export default function ProfilePage() {
 
 // ─── Profile Tab ─────────────────────────────────────────────────────────────
 
-function ProfileTabContent({ user }: { user: any }) {
+function ProfileTabContent({ user }: { user: User | null }) {
   const dispatch = useDispatch();
   const updateProfile = useUpdateProfile();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -193,7 +193,7 @@ function ProfileTabContent({ user }: { user: any }) {
   };
 
   const handleSave = () => {
-    const body: Record<string, any> = {};
+    const body: Partial<User> & { profilePhoto?: string } = {};
     if (name.trim() && name.trim() !== user?.name) body.name = name.trim();
     if (phone.trim() !== (user?.phone ?? '')) body.phone = phone.trim();
     if (avatar) body.profilePhoto = avatar;
@@ -203,7 +203,7 @@ function ProfileTabContent({ user }: { user: any }) {
       return;
     }
 
-    updateProfile.mutate(body as any, {
+    updateProfile.mutate(body, {
       onSuccess: (response) => {
         // Update Redux + localStorage so Navbar reflects new name/avatar
         const updated = response.data?.data?.user ?? response.data?.data ?? {};
@@ -365,7 +365,7 @@ function BorrowedListTabContent() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const { data: loans = [], isLoading } = useMyLoans({
-    status: currentStatus as any,
+    status: currentStatus as LoanFilters['status'],
     q: searchQuery,
   });
 

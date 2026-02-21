@@ -53,7 +53,10 @@ function useReturnLoanAdmin() {
       toast.success('Loan marked as returned');
       qc.invalidateQueries({ queryKey: ['admin-loans'] });
     },
-    onError: (e: any) => toast.error(e.response?.data?.message || 'Failed'),
+    onError: (e: Error) => {
+      const axiosError = e as import('axios').AxiosError<{ message?: string }>;
+      toast.error(axiosError.response?.data?.message || 'Failed');
+    },
   });
 }
 

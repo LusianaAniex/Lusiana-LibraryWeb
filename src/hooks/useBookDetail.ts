@@ -50,8 +50,13 @@ export function useCreateReview() {
         queryKey: ['book', String(variables.bookId)],
       });
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to submit review');
+    onError: (error: Error) => {
+      const axiosError = error as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to submit review'
+      );
     },
   });
 }
@@ -68,8 +73,13 @@ export function useBorrowBook() {
       queryClient.invalidateQueries({ queryKey: ['book', String(bookId)] });
       queryClient.invalidateQueries({ queryKey: ['my-loans'] });
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to borrow book');
+    onError: (error: Error) => {
+      const axiosError = error as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to borrow book'
+      );
     },
   });
 }

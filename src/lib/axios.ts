@@ -24,6 +24,7 @@ api.interceptors.request.use(
 
 // Helper to sanitize blob URLs locally so they don't break frontend mapping
 const sanitizeBlobUrls = (data: any) => {
+  // eslint-disable-line @typescript-eslint/no-explicit-any
   if (!data || typeof data !== 'object') return;
   if (Array.isArray(data)) {
     data.forEach(sanitizeBlobUrls);

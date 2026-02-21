@@ -23,3 +23,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Test files
+*.test.js
+*.spec.js
+__tests__/
+tests/
+test-data/
+mock-*.js
+*.txt
+
+APIDOCS.md 

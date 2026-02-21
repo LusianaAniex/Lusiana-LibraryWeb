@@ -47,6 +47,7 @@ export interface Book {
   categoryId: number;
   createdAt: string;
   updatedAt: string;
+  pages?: number;
   author?: Author;
   category?: Category;
   reviews?: Review[];

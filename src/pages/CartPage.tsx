@@ -6,12 +6,37 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ShoppingCart, Trash2, BookOpen } from 'lucide-react';
 import type { CartItem } from '@/types';
 
+// ── Loan Summary Component ───────────────────────────────────────────────────
+interface LoanSummaryProps {
+  selectedCount: number;
+  onBorrow: () => void;
+}
+
+const LoanSummary = ({ selectedCount, onBorrow }: LoanSummaryProps) => (
+  <div className='rounded-xl border border-neutral-200 bg-white p-5 space-y-4'>
+    <h3 className='font-semibold text-neutral-900 text-base'>Loan Summary</h3>
+    <div className='flex items-center justify-between text-sm'>
+      <span className='text-neutral-500'>Total Book</span>
+      <span className='font-semibold text-neutral-900'>
+        {selectedCount} {selectedCount === 1 ? 'Item' : 'Items'}
+      </span>
+    </div>
+    <Button
+      className='w-full bg-blue-600 hover:bg-blue-700 text-white h-11 font-semibold rounded-lg text-sm'
+      disabled={selectedCount === 0}
+      onClick={onBorrow}
+    >
+      Borrow Book
+    </Button>
+  </div>
+);
+
 export default function CartPage() {
   const navigate = useNavigate();
   const { data: cart, isLoading } = useCart();
   const removeItem = useRemoveCartItem();
 
-  const items: CartItem[] = cart?.items ?? [];
+  const items: CartItem[] = useMemo(() => cart?.items ?? [], [cart]);
 
   // ── Selection state ────────────────────────────────────────────────────────
   const [selected, setSelected] = useState<Set<number>>(new Set());
@@ -35,7 +60,8 @@ export default function CartPage() {
   const toggleItem = (id: number) => {
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };
@@ -47,26 +73,6 @@ export default function CartPage() {
       state: { itemIds, items: items.filter((i) => itemIds.includes(i.id)) },
     });
   };
-
-  // ── Loan Summary ───────────────────────────────────────────────────────────
-  const LoanSummary = () => (
-    <div className='rounded-xl border border-neutral-200 bg-white p-5 space-y-4'>
-      <h3 className='font-semibold text-neutral-900 text-base'>Loan Summary</h3>
-      <div className='flex items-center justify-between text-sm'>
-        <span className='text-neutral-500'>Total Book</span>
-        <span className='font-semibold text-neutral-900'>
-          {validSelected.size} {validSelected.size === 1 ? 'Item' : 'Items'}
-        </span>
-      </div>
-      <Button
-        className='w-full bg-blue-600 hover:bg-blue-700 text-white h-11 font-semibold rounded-lg text-sm'
-        disabled={validSelected.size === 0}
-        onClick={handleBorrow}
-      >
-        Borrow Book
-      </Button>
-    </div>
-  );
 
   if (isLoading) {
     return (
@@ -183,7 +189,10 @@ export default function CartPage() {
 
           {/* Desktop Loan Summary */}
           <div className='hidden lg:block'>
-            <LoanSummary />
+            <LoanSummary
+              selectedCount={validSelected.size}
+              onBorrow={handleBorrow}
+            />
           </div>
         </div>
       )}

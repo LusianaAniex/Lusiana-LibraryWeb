@@ -40,8 +40,13 @@ function useCreateCategory() {
       toast.success('Category created');
       qc.invalidateQueries({ queryKey: ['categories'] });
     },
-    onError: (err: any) => {
-      toast.error(err.response?.data?.message || 'Failed to create category');
+    onError: (err: Error) => {
+      const axiosError = err as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to create category'
+      );
     },
   });
 }
@@ -55,8 +60,13 @@ function useUpdateCategory() {
       toast.success('Category updated');
       qc.invalidateQueries({ queryKey: ['categories'] });
     },
-    onError: (err: any) => {
-      toast.error(err.response?.data?.message || 'Failed to update category');
+    onError: (err: Error) => {
+      const axiosError = err as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to update category'
+      );
     },
   });
 }
@@ -69,10 +79,13 @@ function useDeleteCategory() {
       toast.success('Category deleted');
       qc.invalidateQueries({ queryKey: ['categories'] });
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       // Backend blocks delete when category still has books
+      const axiosError = err as import('axios').AxiosError<{
+        message?: string;
+      }>;
       toast.error(
-        err.response?.data?.message ||
+        axiosError.response?.data?.message ||
           'Cannot delete — category still has books'
       );
     },

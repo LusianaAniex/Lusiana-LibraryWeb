@@ -26,8 +26,12 @@ export default function CheckoutPage() {
   const location = useLocation();
 
   // Items passed from CartPage via navigation state
-  const passedItems: CartItem[] = (location.state as any)?.items ?? [];
-  const passedItemIds: number[] = (location.state as any)?.itemIds ?? [];
+  const state = location.state as {
+    items?: CartItem[];
+    itemIds?: number[];
+  } | null;
+  const passedItems: CartItem[] = state?.items ?? [];
+  const passedItemIds: number[] = state?.itemIds ?? [];
 
   const { data: profile } = useMyProfile();
   const borrow = useBorrowFromCart();

@@ -174,7 +174,7 @@ export default function BookDetailPage() {
             <div className='flex items-center gap-8 mb-8 pb-8 border-b border-neutral-100'>
               <div className='flex flex-col'>
                 <span className='text-2xl font-bold text-neutral-900'>
-                  {(book as any).pages || 330}
+                  {book.pages || 330}
                 </span>
                 <span className='text-xs text-neutral-500 uppercase tracking-wider font-medium'>
                   Page

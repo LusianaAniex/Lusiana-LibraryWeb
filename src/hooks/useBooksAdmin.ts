@@ -20,8 +20,13 @@ export function useCreateBook() {
       toast.success('Book created successfully');
       queryClient.invalidateQueries({ queryKey: ['books'] });
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to create book');
+    onError: (error: Error) => {
+      const axiosError = error as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to create book'
+      );
     },
   });
 }
@@ -36,8 +41,13 @@ export function useUpdateBook() {
       toast.success('Book updated successfully');
       queryClient.invalidateQueries({ queryKey: ['books'] });
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to update book');
+    onError: (error: Error) => {
+      const axiosError = error as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to update book'
+      );
     },
   });
 }
@@ -52,8 +62,13 @@ export function useDeleteBook() {
       toast.success('Book deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['books'] });
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to delete book');
+    onError: (error: Error) => {
+      const axiosError = error as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to delete book'
+      );
     },
   });
 }

@@ -29,7 +29,7 @@ export function useAuthors() {
           : [];
 
       const authorCounts = new Map<number, number>();
-      booksList.forEach((b: any) => {
+      booksList.forEach((b: import('@/types').Book) => {
         const authorId = b.author?.id || b.authorId;
         if (authorId) {
           authorCounts.set(authorId, (authorCounts.get(authorId) || 0) + 1);
@@ -54,8 +54,13 @@ export function useCreateAuthor() {
       toast.success('Author created successfully');
       queryClient.invalidateQueries({ queryKey: ['authors'] });
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to create author');
+    onError: (error: Error) => {
+      const axiosError = error as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to create author'
+      );
     },
   });
 }
@@ -70,8 +75,13 @@ export function useUpdateAuthor() {
       toast.success('Author updated successfully');
       queryClient.invalidateQueries({ queryKey: ['authors'] });
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to update author');
+    onError: (error: Error) => {
+      const axiosError = error as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to update author'
+      );
     },
   });
 }
@@ -86,8 +96,13 @@ export function useDeleteAuthor() {
       toast.success('Author deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['authors'] });
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to delete author');
+    onError: (error: Error) => {
+      const axiosError = error as import('axios').AxiosError<{
+        message?: string;
+      }>;
+      toast.error(
+        axiosError.response?.data?.message || 'Failed to delete author'
+      );
     },
   });
 }

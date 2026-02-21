@@ -141,9 +141,9 @@ export default function AdminAuthorsPage() {
                       <td className='px-6 py-4'>
                         <div className='flex items-center gap-4'>
                           <div className='h-12 w-12 shrink-0 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100'>
-                            {(author as any).profilePhoto ? (
+                            {author.profilePhoto ? (
                               <img
-                                src={(author as any).profilePhoto}
+                                src={author.profilePhoto}
                                 alt={author.name}
                                 className='h-full w-full object-cover'
                               />
@@ -245,9 +245,9 @@ export default function AdminAuthorsPage() {
                     </div>
 
                     <div className='h-14 w-14 shrink-0 overflow-hidden rounded-full border border-neutral-200 bg-white mb-3'>
-                      {(author as any).profilePhoto ? (
+                      {author.profilePhoto ? (
                         <img
-                          src={(author as any).profilePhoto}
+                          src={author.profilePhoto}
                           alt={author.name}
                           className='h-full w-full object-cover'
                         />
