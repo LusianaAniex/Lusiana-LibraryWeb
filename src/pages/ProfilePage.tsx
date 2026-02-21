@@ -224,8 +224,13 @@ function ProfileTabContent({ user }: { user: any }) {
         {/* Avatar section */}
         <div className='px-6 pt-6 pb-4 border-b border-neutral-100'>
           <div className='relative w-fit'>
-            <Avatar className='h-16 w-16 border-2 border-neutral-200 shadow-sm'>
-              <AvatarImage src={previewPhoto ?? undefined} />
+            <Avatar className='h-16 w-16 border-2 border-neutral-200 shadow-sm overflow-hidden'>
+              <AvatarImage
+                src={previewPhoto ?? undefined}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
               <AvatarFallback className='bg-neutral-800 text-white text-xl font-bold'>
                 {initial}
               </AvatarFallback>

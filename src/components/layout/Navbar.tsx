@@ -6,7 +6,6 @@ import { useCartCount } from '@/hooks/useCart';
 import { api } from '@/lib/axios';
 import {
   Search,
-  Menu,
   X,
   BookOpen,
   User,
@@ -50,7 +49,7 @@ export default function Navbar() {
   const dispatch = useDispatch();
   const logout = useLogout();
   const navigate = useNavigate();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   // Live profile for up-to-date avatar / name
   const { data: liveProfile } = useLiveProfile();
@@ -97,17 +96,20 @@ export default function Navbar() {
         </form>
 
         {/* Right side */}
-        <div className='flex items-center gap-2'>
+        <div className='flex items-center gap-3 sm:gap-2'>
           {/* Mobile search */}
-          <button className='sm:hidden p-2 text-neutral-500 hover:text-neutral-700'>
+          <button
+            className='sm:hidden p-2 text-neutral-500 hover:text-neutral-700 cursor-pointer'
+            onClick={() => setMobileSearchOpen(true)}
+          >
             <Search size={20} />
           </button>
 
           {isAuthenticated && (
-            /* Cart icon with badge */
+            /* Cart icon with badge (always visible since mobile now needs it here) */
             <button
               onClick={() => navigate('/cart')}
-              className='relative p-2 text-neutral-500 hover:text-neutral-700 transition-colors'
+              className='relative p-2 text-neutral-500 hover:text-neutral-700 transition-colors cursor-pointer mr-2 sm:mr-0'
               title='My Cart'
             >
               <ShoppingCart size={22} />
@@ -123,11 +125,14 @@ export default function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className='flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 cursor-pointer'>
-                  <Avatar className='h-9 w-9 border-2 border-primary-200'>
+                  <Avatar className='h-9 w-9 border-2 border-primary-200 overflow-hidden'>
                     {profile?.profilePhoto && (
                       <AvatarImage
                         src={profile.profilePhoto}
                         alt={profile?.name ?? 'User'}
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     )}
                     <AvatarFallback className='bg-primary-50 text-primary-600 font-semibold text-sm'>
@@ -205,76 +210,38 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Mobile menu toggle */}
-          <button
-            className='sm:hidden p-2 text-neutral-500 hover:text-neutral-700'
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          {/* Removed Mobile Menu Toggle */}
         </div>
       </div>
 
-      {/* Mobile menu */}
-      {mobileMenuOpen && (
-        <div className='sm:hidden border-t border-neutral-200 bg-white px-4 py-3 space-y-3'>
-          <form onSubmit={handleSearchSubmit}>
-            <div className='relative'>
+      {/* Mobile Search Modal Overlay */}
+      {mobileSearchOpen && (
+        <div className='absolute inset-0 z-[100] h-16 bg-white sm:hidden flex items-center px-4'>
+          <form
+            onSubmit={(e) => {
+              handleSearchSubmit(e);
+              setMobileSearchOpen(false);
+            }}
+            className='w-full flex items-center gap-2'
+          >
+            <div className='relative flex-1'>
               <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400' />
               <Input
-                placeholder='Search books...'
+                autoFocus
+                placeholder='Search book...'
                 value={searchQuery}
                 onChange={handleSearch}
-                className='h-10 pl-9 rounded-lg border-neutral-200 bg-neutral-50 text-sm'
+                className='h-10 pl-9 rounded-full border-neutral-200 bg-neutral-50 text-sm'
               />
             </div>
+            <button
+              type='button'
+              onClick={() => setMobileSearchOpen(false)}
+              className='p-2 text-neutral-500 cursor-pointer hover:bg-neutral-100 rounded-full'
+            >
+              <X size={20} />
+            </button>
           </form>
-          {isAuthenticated && (
-            <div className='space-y-1'>
-              <button
-                onClick={() => {
-                  navigate('/profile');
-                  setMobileMenuOpen(false);
-                }}
-                className='flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50'
-              >
-                <User size={16} /> My Profile
-              </button>
-              <button
-                onClick={() => {
-                  navigate('/my-loans');
-                  setMobileMenuOpen(false);
-                }}
-                className='flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50'
-              >
-                <BookOpen size={16} /> My Loans
-              </button>
-              <button
-                onClick={() => {
-                  navigate('/cart');
-                  setMobileMenuOpen(false);
-                }}
-                className='flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50'
-              >
-                <ShoppingCart size={16} />
-                My Cart
-                {cartCount > 0 && (
-                  <span className='ml-auto text-xs bg-red-500 text-white rounded-full px-1.5 py-0.5 font-bold'>
-                    {cartCount}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={() => {
-                  logout();
-                  setMobileMenuOpen(false);
-                }}
-                className='flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-accent-red hover:bg-red-50'
-              >
-                <LogOut size={16} /> Logout
-              </button>
-            </div>
-          )}
         </div>
       )}
     </header>

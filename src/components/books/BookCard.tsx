@@ -39,21 +39,25 @@ export function BookCard({ book }: { book: Book }) {
       className='group flex flex-col rounded-xl border border-neutral-200 bg-white overflow-hidden transition-shadow hover:shadow-lg'
     >
       {/* Cover */}
-      <div className='aspect-3/4 w-full overflow-hidden bg-neutral-100'>
-        {book.coverImage ? (
+      <div className='relative aspect-3/4 w-full overflow-hidden bg-neutral-100'>
+        {/* Base fallback ALWAYS rendered underneath */}
+        <div className='absolute inset-0 flex h-full w-full items-center justify-center text-neutral-400 z-0'>
+          <img
+            src='/logos/book-icon.svg'
+            alt='Book fallback'
+            className='h-12 w-12 opacity-40'
+          />
+        </div>
+        {/* Cover image conditionally on top */}
+        {book.coverImage && (
           <img
             src={book.coverImage}
             alt={book.title}
-            className='h-full w-full object-cover transition-transform group-hover:scale-105'
+            className='absolute inset-0 h-full w-full object-cover transition-transform group-hover:scale-105 z-10 bg-neutral-100'
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
           />
-        ) : (
-          <div className='flex h-full w-full items-center justify-center text-neutral-400'>
-            <img
-              src='/logos/book-icon.svg'
-              alt='Book'
-              className='h-12 w-12 opacity-40'
-            />
-          </div>
         )}
       </div>
       {/* Info */}

@@ -57,41 +57,41 @@ export default function ReviewSection({ bookId }: ReviewSectionProps) {
       </h2>
 
       {/* Review List */}
-      <div className='space-y-6 mb-10'>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-10'>
         {isLoading ? (
-          <p className='text-neutral-500'>Loading reviews...</p>
+          <p className='text-neutral-500 col-span-full'>Loading reviews...</p>
         ) : reviews.length === 0 ? (
-          <p className='text-neutral-500 italic'>
+          <p className='text-neutral-500 italic col-span-full'>
             No reviews yet. Be the first!
           </p>
         ) : (
           reviews.map((review) => (
             <div
               key={review.id}
-              className='flex gap-4 p-4 rounded-xl bg-neutral-50/50 border border-neutral-100'
+              className='flex flex-col p-5 rounded-2xl bg-white border border-neutral-200 shadow-sm hover:shadow-md transition-shadow'
             >
-              <Avatar className='h-10 w-10 border border-neutral-200'>
-                <AvatarImage src={review.user?.profilePhoto || undefined} />
-                <AvatarFallback>
-                  {review.user?.name?.[0]?.toUpperCase() || '?'}
-                </AvatarFallback>
-              </Avatar>
-              <div className='flex-1'>
-                <div className='flex items-center justify-between mb-1'>
-                  <h4 className='font-semibold text-neutral-900'>
+              <div className='flex gap-3 mb-3'>
+                <Avatar className='h-10 w-10 border border-neutral-200'>
+                  <AvatarImage src={review.user?.profilePhoto || undefined} />
+                  <AvatarFallback>
+                    {review.user?.name?.[0]?.toUpperCase() || '?'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className='flex flex-col'>
+                  <h4 className='font-bold text-neutral-900 text-sm'>
                     {review.user?.name || 'Anonymous'}
                   </h4>
-                  <span className='text-xs text-neutral-400'>
+                  <span className='text-[11px] text-neutral-400 font-medium'>
                     {formatDate(review.createdAt)}
                   </span>
                 </div>
-                <div className='mb-2'>
-                  <StarRating rating={review.star} readonly size={14} />
-                </div>
-                <p className='text-neutral-600 text-sm leading-relaxed'>
-                  {review.comment}
-                </p>
               </div>
+              <div className='mb-2'>
+                <StarRating rating={review.star} readonly size={12} />
+              </div>
+              <p className='text-neutral-600 text-xs leading-relaxed line-clamp-4'>
+                {review.comment}
+              </p>
             </div>
           ))
         )}

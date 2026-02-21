@@ -57,6 +57,7 @@ export interface Author {
   id: number;
   name: string;
   bio?: string | null;
+  profilePhoto?: string | null;
   bookCount?: number;
   accumulatedScore?: number;
 }

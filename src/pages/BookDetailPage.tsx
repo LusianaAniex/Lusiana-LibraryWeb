@@ -1,22 +1,37 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBookDetail, useBorrowBook } from '@/hooks/useBookDetail';
 import { useAddToCart } from '@/hooks/useCart';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/axios';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/store/store';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  ChevronLeft,
-  BookOpen,
-  ShoppingCart,
-  User as UserIcon,
-  Calendar,
-} from 'lucide-react';
+import { ChevronLeft, BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import StarRating from '@/components/books/StarRating';
 import ReviewSection from '@/components/books/ReviewSection';
+import { BookCard } from '@/components/books/BookCard';
+import type { Book } from '@/types';
+
+function useRelatedBooks(categoryId?: number, currentBookId?: number) {
+  return useQuery<Book[]>({
+    queryKey: ['related-books', categoryId],
+    queryFn: async () => {
+      if (!categoryId) return [];
+      const res = await api.get('/api/books', {
+        params: { categoryId, limit: 5 },
+      });
+      const payload = res.data?.data;
+      const booksList = Array.isArray(payload) ? payload : payload?.books || [];
+      // Exclude current book
+      return booksList.filter((b: Book) => b.id !== currentBookId).slice(0, 4);
+    },
+    enabled: !!categoryId,
+  });
+}
 
 export default function BookDetailPage() {
   const { id } = useParams();
@@ -26,6 +41,12 @@ export default function BookDetailPage() {
   const { data: book, isLoading, error } = useBookDetail(id);
   const borrowBook = useBorrowBook();
   const addToCart = useAddToCart();
+
+  // Fetch related books based on current book's category
+  const { data: relatedBooks = [] } = useRelatedBooks(
+    book?.categoryId,
+    book?.id
+  );
 
   const handleBorrow = () => {
     if (!book) return;
@@ -84,144 +105,175 @@ export default function BookDetailPage() {
         </div>
       </div>
 
-      <div className='container mx-auto px-4 py-8 max-w-6xl'>
-        <div className='grid grid-cols-1 md:grid-cols-[300px_1fr] lg:grid-cols-[350px_1fr] gap-8 lg:gap-12'>
-          {/* Left Column: Cover & Action */}
-          <div className='flex flex-col gap-6'>
-            <div className='relative aspect-2/3 w-full overflow-hidden rounded-xl bg-neutral-100 shadow-xl ring-1 ring-neutral-900/5'>
-              {book.coverImage ? (
-                <img
-                  src={book.coverImage}
-                  alt={book.title}
-                  className='h-full w-full object-cover transition-transform hover:scale-105 duration-500'
-                />
-              ) : (
-                <div className='flex h-full w-full items-center justify-center text-neutral-300'>
-                  <BookOpen size={64} />
-                </div>
-              )}
-              {/* Dynamic status badge overlay */}
-              <div className='absolute top-4 right-4'>
-                {isAvailable ? (
-                  <Badge className='bg-green-500/90 text-white hover:bg-green-600 border-0 backdrop-blur-md shadow-sm'>
-                    Available
-                  </Badge>
+      <div className='container mx-auto px-4 py-8 max-w-5xl'>
+        <div className='flex flex-col md:flex-row gap-8 lg:gap-16'>
+          {/* Left Column: Cover */}
+          <div className='w-full md:w-[320px] max-w-[360px] mx-auto md:mx-0 shrink-0'>
+            <div className='relative w-full overflow-hidden rounded-xl shadow-md border border-neutral-200 bg-white p-2'>
+              <div className='aspect-2/3 w-full bg-neutral-100 rounded-lg overflow-hidden relative'>
+                {book.coverImage ? (
+                  <img
+                    src={book.coverImage}
+                    alt={book.title}
+                    className='h-full w-full object-cover transition-transform hover:scale-105 duration-500'
+                  />
                 ) : (
-                  <Badge className='bg-orange-500/90 text-white hover:bg-orange-600 border-0 backdrop-blur-md shadow-sm'>
-                    Out of Stock
-                  </Badge>
+                  <div className='flex h-full w-full items-center justify-center text-neutral-300'>
+                    <BookOpen size={64} />
+                  </div>
                 )}
               </div>
             </div>
+          </div>
 
-            <div className='p-6 bg-neutral-50 rounded-xl border border-neutral-100 text-center space-y-4'>
-              <div className='flex justify-between items-center text-sm'>
-                <span className='text-neutral-500'>Total Copies</span>
-                <span className='font-medium text-neutral-900'>
-                  {book.totalCopies}
+          {/* Right Column: Details */}
+          <div className='flex-1 flex flex-col'>
+            {/* Category / Year */}
+            <div className='mb-3 flex items-center gap-2'>
+              <Badge
+                variant='outline'
+                className='text-xs text-neutral-600 bg-neutral-100 border-neutral-200 uppercase tracking-wider font-semibold'
+              >
+                {book.category?.name || 'General'}
+              </Badge>
+              {book.publishedYear && (
+                <span className='text-sm text-neutral-400 flex items-center gap-1 font-medium'>
+                  • {book.publishedYear}
                 </span>
-              </div>
-              <Separator />
-              <div className='flex justify-between items-center text-sm'>
-                <span className='text-neutral-500'>Available</span>
-                <span
-                  className={`font-bold ${isAvailable ? 'text-green-600' : 'text-orange-600'}`}
+              )}
+            </div>
+
+            {/* Title */}
+            <h1 className='text-3xl md:text-5xl font-extrabold text-neutral-900 tracking-tight leading-tight mb-2'>
+              {book.title}
+            </h1>
+
+            {/* Author */}
+            <div className='mb-6'>
+              {book.authorId ? (
+                <Link
+                  to={`/authors/${book.authorId}`}
+                  className='text-base font-semibold text-neutral-600 hover:text-primary-600 hover:underline transition-colors'
                 >
-                  {book.availableCopies}
+                  {book.author?.name || 'Unknown Author'}
+                </Link>
+              ) : (
+                <span className='text-base font-semibold text-neutral-600'>
+                  {book.author?.name || 'Unknown Author'}
+                </span>
+              )}
+              <div className='mt-2 flex items-center gap-1 text-accent-yellow'>
+                <StarRating rating={book.rating} readonly size={16} />
+                <span className='text-sm text-neutral-800 font-bold ml-1'>
+                  {book.rating.toFixed(1)}
                 </span>
               </div>
+            </div>
 
+            {/* Stats Row */}
+            <div className='flex items-center gap-8 mb-8 pb-8 border-b border-neutral-100'>
+              <div className='flex flex-col'>
+                <span className='text-2xl font-bold text-neutral-900'>
+                  {(book as any).pages || 330}
+                </span>
+                <span className='text-xs text-neutral-500 uppercase tracking-wider font-medium'>
+                  Page
+                </span>
+              </div>
+              <div className='w-px h-10 bg-neutral-200' />
+              <div className='flex flex-col'>
+                <span className='text-2xl font-bold text-neutral-900'>
+                  {book.reviewCount || 212}
+                </span>
+                <span className='text-xs text-neutral-500 uppercase tracking-wider font-medium'>
+                  Rating
+                </span>
+              </div>
+              <div className='w-px h-10 bg-neutral-200' />
+              <div className='flex flex-col'>
+                <span className='text-2xl font-bold text-neutral-900'>
+                  {book.reviewCount || 179}
+                </span>
+                <span className='text-xs text-neutral-500 uppercase tracking-wider font-medium'>
+                  Reviews
+                </span>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className='mb-10'>
+              <h3 className='text-base font-bold text-neutral-900 mb-3'>
+                Description
+              </h3>
+              <p className='text-neutral-600 leading-relaxed text-sm md:text-base'>
+                {book.description || 'No description available for this book.'}
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className='flex flex-col sm:flex-row gap-4 mb-12 max-w-lg'>
               <Button
                 size='lg'
-                className={`w-full font-semibold shadow-lg shadow-primary-500/20 active:scale-95 transition-all ${
-                  !isAvailable ? 'opacity-80' : ''
+                variant='outline'
+                className='flex-1 h-12 md:h-14 rounded-full border-2 border-primary-600 text-primary-600 font-bold hover:bg-primary-50 transition-colors'
+                disabled={
+                  addToCart.isPending || !isAuthenticated || !isAvailable
+                }
+                onClick={() => book && addToCart.mutate(book.id)}
+              >
+                {addToCart.isPending ? 'Adding…' : 'Add to Cart'}
+              </Button>
+              <Button
+                size='lg'
+                className={`flex-1 h-12 md:h-14 rounded-full font-bold shadow-lg shadow-primary-500/30 active:scale-95 transition-all text-white ${
+                  !isAvailable
+                    ? 'bg-neutral-300 text-neutral-500 cursor-not-allowed shadow-none'
+                    : 'bg-primary-600 hover:bg-primary-700'
                 }`}
-                disabled={!isAvailable || borrowBook.isPending}
+                disabled={
+                  !isAvailable || borrowBook.isPending || !isAuthenticated
+                }
                 onClick={handleBorrow}
               >
                 {borrowBook.isPending
                   ? 'Processing...'
                   : isAvailable
                     ? 'Borrow Book'
-                    : 'Unavailable'}
+                    : 'Out of Stock'}
               </Button>
-              {isAuthenticated && isAvailable && (
-                <Button
-                  size='lg'
-                  variant='outline'
-                  className='w-full font-semibold active:scale-95 transition-all'
-                  disabled={addToCart.isPending}
-                  onClick={() => book && addToCart.mutate(book.id)}
-                >
-                  <ShoppingCart className='mr-2 h-4 w-4' />
-                  {addToCart.isPending ? 'Adding…' : 'Add to Cart'}
-                </Button>
-              )}
+
               {!isAuthenticated && (
-                <p className='text-xs text-neutral-400'>
-                  Sign in to borrow this book
+                <p className='text-xs text-center text-neutral-400 mt-2 sm:hidden'>
+                  Sign in to interact with this book
                 </p>
               )}
             </div>
-          </div>
 
-          {/* Right Column: Details */}
-          <div>
-            <div className='mb-2 flex items-center gap-2'>
-              <Badge
-                variant='outline'
-                className='text-primary-600 border-primary-200 bg-primary-50'
-              >
-                {book.category?.name || 'General'}
-              </Badge>
-              {book.publishedYear && (
-                <span className='text-sm text-neutral-400 flex items-center gap-1'>
-                  <Calendar size={14} /> {book.publishedYear}
-                </span>
-              )}
-            </div>
-
-            <h1 className='text-3xl md:text-4xl font-extrabold text-neutral-900 tracking-tight leading-tight mb-4'>
-              {book.title}
-            </h1>
-
-            <div className='flex items-center gap-4 mb-8'>
-              <div className='flex items-center gap-2 text-neutral-700 font-medium'>
-                <div className='h-8 w-8 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-500'>
-                  <UserIcon size={16} />
-                </div>
-                {book.authorId ? (
-                  <Link
-                    to={`/authors/${book.authorId}`}
-                    className='text-primary-600 hover:text-primary-700 hover:underline transition-colors'
-                  >
-                    {book.author?.name || 'Unknown Author'}
-                  </Link>
-                ) : (
-                  <span>{book.author?.name || 'Unknown Author'}</span>
-                )}
-              </div>
-              <div className='w-px h-4 bg-neutral-300' />
-              <div className='flex items-center gap-2'>
-                <StarRating rating={book.rating} readonly size={18} />
-                <span className='text-sm text-neutral-500 font-medium pt-0.5'>
-                  ({book.reviewCount} reviews)
-                </span>
-              </div>
-            </div>
-
-            <div className='prose prose-neutral max-w-none mb-10 text-neutral-600 leading-relaxed'>
-              <h3 className='text-lg font-semibold text-neutral-900 mb-2'>
-                About this book
-              </h3>
-              <p>
-                {book.description || 'No description available for this book.'}
+            {!isAuthenticated && (
+              <p className='text-sm text-neutral-500 hidden sm:block mb-8'>
+                <Link to='/login' className='text-primary-600 hover:underline'>
+                  Sign in
+                </Link>{' '}
+                to borrow or add to cart.
               </p>
-            </div>
+            )}
 
-            <Separator className='my-8' />
-
+            {/* Reviews Section */}
             <ReviewSection bookId={book.id} />
+
+            {/* Related Books */}
+            {relatedBooks.length > 0 && (
+              <div className='mt-16'>
+                <h2 className='text-2xl font-bold text-neutral-900 mb-6'>
+                  Related Books
+                </h2>
+                <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4'>
+                  {relatedBooks.map((relatedBook) => (
+                    <BookCard key={relatedBook.id} book={relatedBook} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

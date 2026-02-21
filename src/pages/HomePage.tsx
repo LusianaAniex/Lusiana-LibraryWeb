@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppDispatch';
-import { setSearchQuery, setCategoryFilter } from '@/store/uiSlice';
+import { setSearchQuery } from '@/store/uiSlice';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/axios';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -56,23 +56,6 @@ function useBooks(params: {
   });
 }
 
-function useRecommendedBooks(page = 1) {
-  return useQuery<Book[]>({
-    queryKey: ['books', 'recommended', page],
-    queryFn: async () => {
-      const { data } = await api.get('/api/books/recommend', {
-        params: { page, limit: 10 },
-      });
-      // Backend: { success, message, data: { books: [...] } } or data: [...]
-      const payload = data?.data;
-      if (Array.isArray(payload)) return payload;
-      if (Array.isArray(payload?.books)) return payload.books;
-      return [];
-    },
-    staleTime: 1000 * 60 * 5,
-  });
-}
-
 function usePopularAuthors() {
   return useQuery<Author[]>({
     queryKey: ['authors', 'popular'],
@@ -88,23 +71,8 @@ function usePopularAuthors() {
   });
 }
 
-// ── Category icon map ────────────────────────────────────
-const categoryIcons: Record<string, string> = {
-  education: '/logos/education-icon.svg',
-  fiction: '/logos/fiction-icon.svg',
-  'non-fiction': '/logos/nonfiction-icon.svg',
-  nonfiction: '/logos/nonfiction-icon.svg',
-  finance: '/logos/finance-icon.svg',
-  science: '/logos/science-icon.svg',
-  'self-improvement': '/logos/selfimprovement-icon.svg',
-  selfimprovement: '/logos/selfimprovement-icon.svg',
-  'self improvement': '/logos/selfimprovement-icon.svg',
-};
-
-function getCategoryIcon(name: string) {
-  return categoryIcons[name.toLowerCase()] || '/logos/book-icon.svg';
-}
-
+import { HeroCarousel } from '@/components/home/HeroCarousel';
+import { CategoriesCarousel } from '@/components/home/CategoriesCarousel';
 import { BookCard } from '@/components/books/BookCard';
 
 // ── Main HomePage ────────────────────────────────────────
@@ -129,128 +97,34 @@ export default function HomePage() {
     page: currentPage,
     limit: 10,
   });
-  const recommendedQuery = useRecommendedBooks();
   const authorsQuery = usePopularAuthors();
 
   const categories = categoriesQuery.data ?? [];
   const books = booksQuery.data?.books ?? [];
   const totalPages = booksQuery.data?.totalPages ?? 1;
-  const recommendedBooks = recommendedQuery.data ?? [];
   const popularAuthors = authorsQuery.data ?? [];
 
   return (
-    <div className='bg-white'>
+    <div className='bg-white min-h-screen'>
       {/* ── Hero Banner ───────────────────────────────────── */}
-      <section className='bg-primary-50'>
-        <div className='mx-auto flex max-w-7xl flex-col-reverse items-center gap-8 px-4 py-12 sm:flex-row sm:px-6 sm:py-16 lg:px-8 lg:py-20'>
-          {/* Text */}
-          <div className='flex-1 text-center sm:text-left'>
-            <h1 className='text-display-lg font-bold text-neutral-900 sm:text-display-xl lg:text-display-2xl'>
-              Welcome to <span className='text-primary-600'>Booky</span>
-            </h1>
-            <p className='mt-4 text-md text-neutral-600 max-w-lg sm:text-lg'>
-              Discover books, grow your knowledge, reach far beyond. This
-              library is open for everyone to read & learn.
-            </p>
-            <div className='mt-6 flex flex-wrap gap-3 justify-center sm:justify-start'>
-              <Button className='bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-600/90 cursor-pointer px-6 h-11'>
-                Browse Books
-              </Button>
-              <Button
-                variant='outline'
-                className='border-primary-600 text-primary-600 font-semibold rounded-lg hover:bg-primary-50 cursor-pointer px-6 h-11'
-              >
-                Learn More
-              </Button>
-            </div>
-          </div>
-          {/* Hero image */}
-          <div className='flex-1 flex justify-center'>
-            <img
-              src='/images/hero-image.png'
-              alt='Welcome to Booky'
-              className='w-full max-w-md drop-shadow-lg'
-            />
-          </div>
-        </div>
+      <section className='mx-auto w-full max-w-7xl px-4 pt-6 pb-2 sm:px-6 lg:px-8'>
+        <HeroCarousel />
       </section>
 
       {/* ── Categories ────────────────────────────────────── */}
-      <section className='mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8'>
-        <h2 className='text-display-xs font-bold text-neutral-900 mb-6'>
-          Browse by Category
-        </h2>
-        <div className='flex flex-wrap gap-3'>
-          {/* "All" pill */}
-          <button
-            onClick={() => {
-              dispatch(setCategoryFilter(null));
-              setCurrentPage(1);
-            }}
-            className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
-              selectedCategoryId === null
-                ? 'bg-primary-600 text-white shadow-sm'
-                : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-            }`}
-          >
-            All
-          </button>
-
-          {categoriesQuery.isLoading
-            ? Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className='h-10 w-28 rounded-full' />
-              ))
-            : categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    dispatch(
-                      setCategoryFilter(
-                        selectedCategoryId === cat.id ? null : cat.id
-                      )
-                    );
-                    setCurrentPage(1);
-                  }}
-                  className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
-                    selectedCategoryId === cat.id
-                      ? 'bg-primary-600 text-white shadow-sm'
-                      : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                  }`}
-                >
-                  <img
-                    src={getCategoryIcon(cat.name)}
-                    alt=''
-                    className='h-4 w-4'
-                  />
-                  {cat.name}
-                </button>
-              ))}
-        </div>
+      <section className='mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8'>
+        <CategoriesCarousel
+          categories={categories}
+          isLoading={categoriesQuery.isLoading}
+          onCategorySelect={() => setCurrentPage(1)}
+        />
       </section>
 
-      {/* ── Recommendation Section ────────────────────────── */}
-      {!searchQuery &&
-        selectedCategoryId === null &&
-        recommendedBooks.length > 0 && (
-          <section className='mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8'>
-            <div className='flex items-center justify-between mb-6'>
-              <h2 className='text-display-xs font-bold text-neutral-900'>
-                Recommended for You
-              </h2>
-            </div>
-            <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'>
-              {recommendedBooks.slice(0, 5).map((book: Book) => (
-                <BookCard key={book.id} book={book} />
-              ))}
-            </div>
-          </section>
-        )}
-
       {/* ── Book List (filtered / searched) ───────────────── */}
-      <section className='mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8'>
-        <div className='flex items-center justify-between mb-6'>
-          <h2 className='text-display-xs font-bold text-neutral-900'>
-            {searchQuery ? `Results for "${searchQuery}"` : 'All Books'}
+      <section className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
+        <div className='flex items-center justify-between mb-8'>
+          <h2 className='text-xl sm:text-2xl font-bold text-neutral-900'>
+            {searchQuery ? `Results for "${searchQuery}"` : 'Recommendation'}
           </h2>
         </div>
 
@@ -310,29 +184,18 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* Pagination */}
+            {/* Pagination / Load More */}
             {totalPages > 1 && (
-              <div className='mt-8 flex items-center justify-center gap-2'>
+              <div className='mt-12 flex items-center justify-center'>
                 <Button
                   variant='outline'
-                  size='sm'
-                  disabled={currentPage <= 1}
-                  onClick={() => setCurrentPage((p) => p - 1)}
-                  className='cursor-pointer'
+                  size='lg'
+                  onClick={() =>
+                    setCurrentPage((p) => (p < totalPages ? p + 1 : p))
+                  }
+                  className='cursor-pointer rounded-full px-12 py-6 text-sm font-semibold border-neutral-200 text-neutral-800 hover:bg-neutral-50 shadow-sm'
                 >
-                  Previous
-                </Button>
-                <span className='text-sm text-neutral-500'>
-                  Page {currentPage} of {totalPages}
-                </span>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage((p) => p + 1)}
-                  className='cursor-pointer'
-                >
-                  Next
+                  Load More
                 </Button>
               </div>
             )}
@@ -342,25 +205,44 @@ export default function HomePage() {
 
       {/* ── Popular Authors ───────────────────────────────── */}
       {popularAuthors.length > 0 && (
-        <section className='mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8'>
-          <h2 className='text-display-xs font-bold text-neutral-900 mb-6'>
+        <section className='mx-auto max-w-7xl px-4 py-8 pb-16 sm:px-6 lg:px-8'>
+          <h2 className='text-xl sm:text-2xl font-bold text-neutral-900 mb-8'>
             Popular Authors
           </h2>
-          <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'>
+          <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'>
             {popularAuthors.map((author) => (
               <div
                 key={author.id}
-                className='flex flex-col items-center rounded-xl border border-neutral-200 bg-white p-4 text-center transition-shadow hover:shadow-md'
+                className='flex items-center gap-3 rounded-[32px] border border-neutral-100 bg-white p-2 pr-4 transition-all hover:border-neutral-200 hover:shadow-sm cursor-pointer'
               >
-                <div className='flex h-14 w-14 items-center justify-center rounded-full bg-primary-50 text-primary-600 font-bold text-lg mb-3'>
-                  {author.name.charAt(0)}
+                <div className='relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-800 text-white font-bold text-lg overflow-hidden border border-neutral-100'>
+                  {author.profilePhoto && (
+                    <img
+                      src={author.profilePhoto}
+                      alt={author.name}
+                      className='absolute inset-0 h-full w-full object-cover z-10 bg-neutral-800'
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  )}
+                  <span className='uppercase text-sm z-0'>
+                    {author.name.charAt(0)}
+                  </span>
                 </div>
-                <p className='text-sm font-semibold text-neutral-900 line-clamp-1'>
-                  {author.name}
-                </p>
-                <p className='text-xs text-neutral-500 mt-0.5'>
-                  {author.bookCount || 0} books
-                </p>
+                <div className='flex flex-col flex-1 min-w-0'>
+                  <span className='text-sm font-semibold text-neutral-900 truncate'>
+                    {author.name}
+                  </span>
+                  <span className='text-xs font-medium text-primary-600 flex items-center gap-1.5 mt-0.5'>
+                    <img
+                      src='/logos/book-icon.svg'
+                      className='w-3 h-3 opacity-80'
+                      alt=''
+                    />{' '}
+                    {author.bookCount || 0} books
+                  </span>
+                </div>
               </div>
             ))}
           </div>
