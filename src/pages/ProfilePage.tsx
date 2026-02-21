@@ -19,7 +19,7 @@ import { Camera, Clock, Calendar, Loader2 } from 'lucide-react';
 import StarRating from '@/components/books/StarRating';
 import { GiveReviewModal } from '@/components/books/GiveReviewModal';
 import { Search } from 'lucide-react';
-import type { Loan, Book, User } from '@/types';
+import type { Loan, Book, User, LoanFilters } from '@/types';
 
 // ── Fetch current user from /api/me (with Redux user as stable placeholder) ──
 function useMe() {
