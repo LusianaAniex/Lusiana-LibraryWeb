@@ -111,7 +111,7 @@ export default function Navbar() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const q = (searchQuery ?? '').trim();
-    if (q) navigate(`/?q=${encodeURIComponent(q)}`);
+    if (q) navigate(`/books?q=${encodeURIComponent(q)}`);
   };
 
   const initial = profile?.name?.charAt(0)?.toUpperCase() ?? 'U';

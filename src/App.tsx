@@ -11,6 +11,7 @@ import './App.css';
 // Lazy-loaded pages
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
+const BookExplorerPage = lazy(() => import('@/pages/BookExplorerPage'));
 const BookDetailPage = lazy(() => import('@/pages/BookDetailPage'));
 const AuthorDetailPage = lazy(() => import('@/pages/AuthorDetailPage'));
 const MyLoansPage = lazy(() => import('@/pages/MyLoansPage'));
@@ -50,6 +51,7 @@ function App() {
           {/* Main app routes */}
           <Route element={<MainLayout />}>
             <Route path='/' element={<HomePage />} />
+            <Route path='/books' element={<BookExplorerPage />} />
             <Route path='/books/:id' element={<BookDetailPage />} />
             <Route path='/authors/:id' element={<AuthorDetailPage />} />
             <Route
