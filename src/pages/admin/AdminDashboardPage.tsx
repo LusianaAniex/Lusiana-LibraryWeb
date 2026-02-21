@@ -12,12 +12,14 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 
 function StatCard({
+  title,
   label,
   value,
   icon: Icon,
   color,
   href,
 }: {
+  title: string;
   label: string;
   value?: number | string;
   icon: React.ElementType;
@@ -30,17 +32,20 @@ function StatCard({
       className='bg-white rounded-xl border border-neutral-200 p-6 flex items-center gap-4 hover:shadow-md transition-shadow'
     >
       <div
-        className={`h-12 w-12 rounded-xl flex items-center justify-center ${color}`}
+        className={`h-12 w-12 shrink-0 rounded-xl flex items-center justify-center ${color}`}
       >
         <Icon className='h-6 w-6' />
       </div>
       <div>
-        {value === undefined ? (
-          <Skeleton className='h-7 w-16 mb-1' />
-        ) : (
-          <p className='text-2xl font-bold text-neutral-900'>{value}</p>
-        )}
-        <p className='text-sm text-neutral-500'>{label}</p>
+        <h3 className='text-lg font-bold text-neutral-900'>{title}</h3>
+        <p className='text-sm text-neutral-500 mt-1 flex items-center gap-2'>
+          {value === undefined ? (
+            <Skeleton className='h-4 w-8 inline-block' />
+          ) : (
+            <span className='font-semibold text-neutral-900'>{value}</span>
+          )}
+          <span>{label}</span>
+        </p>
       </div>
     </Link>
   );
@@ -69,6 +74,7 @@ export default function AdminDashboardPage() {
 
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10'>
         <StatCard
+          title='Book List'
           label='Total Books'
           value={isLoading ? undefined : overview?.totalBooks}
           icon={BookOpen}
@@ -76,6 +82,7 @@ export default function AdminDashboardPage() {
           href='/admin/books'
         />
         <StatCard
+          title='Borrowed List'
           label='Total Loans'
           value={isLoading ? undefined : overview?.totalLoans}
           icon={FileText}
@@ -83,6 +90,7 @@ export default function AdminDashboardPage() {
           href='/admin/loans'
         />
         <StatCard
+          title='User'
           label='Registered Users'
           value={isLoading ? undefined : overview?.totalUsers}
           icon={Users}
@@ -90,6 +98,7 @@ export default function AdminDashboardPage() {
           href='/admin/users'
         />
         <StatCard
+          title='Overdue Loans'
           label='Overdue Loans'
           value={isLoading ? undefined : overview?.overdueLoans}
           icon={AlertTriangle}

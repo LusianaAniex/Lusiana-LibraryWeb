@@ -7,13 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -23,7 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import BookFormDialog from '@/components/admin/BookFormDialog';
-import { Search, Plus, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { Search, Star } from 'lucide-react';
 import type { Book } from '@/types';
 
 function useBooks(params: { q?: string; page?: number }) {
@@ -59,6 +52,8 @@ export default function BookListPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [bookToPreview, setBookToPreview] = useState<Book | null>(null);
 
   const booksQuery = useBooks({
     q: searchQuery || undefined,
@@ -82,6 +77,11 @@ export default function BookListPage() {
   const handleEdit = (book: Book) => {
     setSelectedBook(book);
     setIsFormOpen(true);
+  };
+
+  const handlePreview = (book: Book) => {
+    setBookToPreview(book);
+    setIsPreviewOpen(true);
   };
 
   const handleDeleteClick = (book: Book) => {
@@ -118,35 +118,37 @@ export default function BookListPage() {
           </div>
         </div>
 
-        {/* Toolbar */}
-        <div className='mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white p-4 rounded-xl shadow-sm border border-neutral-100'>
-          <div className='relative flex-1 max-w-md'>
+        {/* Add Book & Search */}
+        <div className='mb-6 flex flex-col gap-4'>
+          <div>
+            <Button
+              onClick={handleCreate}
+              className='bg-[#1a4a98] hover:bg-blue-800 text-white rounded-full px-6'
+            >
+              Add Book
+            </Button>
+          </div>
+          <div className='relative w-full max-w-md'>
             <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400' />
             <Input
-              placeholder='Search book...'
+              placeholder='Search book'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className='pl-9 bg-neutral-50 border-neutral-200'
+              className='pl-9 bg-neutral-50/50 border-neutral-200 rounded-full'
             />
           </div>
-          <Button
-            onClick={handleCreate}
-            className='bg-primary-600 hover:bg-primary-700 text-white shrink-0'
-          >
-            <Plus className='mr-2 h-4 w-4' /> Add Book
-          </Button>
         </div>
 
-        {/* Tabs (Visual only for MVP if backend doesn't support status filter) */}
-        <div className='mb-6 flex gap-2 overflow-x-auto pb-2'>
+        {/* Filters */}
+        <div className='mb-6 flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 hide-scrollbar'>
           {['All', 'Available', 'Borrowed', 'Returned'].map((tab) => (
             <button
               key={tab}
               onClick={() => setStatusFilter(tab)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              className={`rounded-full px-3 sm:px-5 py-1.5 text-xs sm:text-sm font-medium transition-colors border whitespace-nowrap ${
                 statusFilter === tab
-                  ? 'bg-primary-100 text-primary-700'
-                  : 'bg-white text-neutral-600 hover:bg-neutral-100 border border-neutral-200'
+                  ? 'border-blue-200 text-blue-600 bg-blue-50/50'
+                  : 'border-neutral-200 text-neutral-600 bg-neutral-50/50 hover:bg-neutral-100'
               }`}
             >
               {tab}
@@ -154,113 +156,87 @@ export default function BookListPage() {
           ))}
         </div>
 
-        {/* Table */}
-        <div className='rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden'>
-          <table className='w-full text-left text-sm'>
-            <thead className='bg-neutral-50 border-b border-neutral-200'>
-              <tr>
-                <th className='px-6 py-4 font-semibold text-neutral-900'>
-                  Book Name
-                </th>
-                <th className='px-6 py-4 font-semibold text-neutral-900'>
-                  Status
-                </th>
-                <th className='px-6 py-4 font-semibold text-neutral-900 text-right'>
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className='divide-y divide-neutral-100'>
-              {booksQuery.isLoading ? (
-                <tr>
-                  <td colSpan={3} className='p-6'>
-                    <div className='flex flex-col gap-2'>
-                      <Skeleton className='h-12 w-full' />
-                      <Skeleton className='h-12 w-full' />
-                      <Skeleton className='h-12 w-full' />
-                    </div>
-                  </td>
-                </tr>
-              ) : filteredBooks.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className='p-12 text-center text-neutral-500'>
-                    No books found.
-                  </td>
-                </tr>
-              ) : (
-                filteredBooks.map((book) => (
-                  <tr
-                    key={book.id}
-                    className='hover:bg-neutral-50 transition-colors'
-                  >
-                    <td className='px-6 py-4'>
-                      <div className='flex items-center gap-4'>
-                        <div className='h-16 w-12 shrink-0 overflow-hidden rounded-md border border-neutral-200 bg-neutral-100'>
-                          {book.coverImage ? (
-                            <img
-                              src={book.coverImage}
-                              alt=''
-                              className='h-full w-full object-cover'
-                            />
-                          ) : (
-                            <div className='flex h-full w-full items-center justify-center text-neutral-300'>
-                              📚
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <p className='font-medium text-neutral-900 line-clamp-1'>
-                            {book.title}
-                          </p>
-                          <p className='text-xs text-neutral-500'>
-                            {book.author?.name || 'Unknown'}
-                          </p>
-                          <p className='text-xs text-neutral-400 mt-1'>
-                            {book.category?.name}
-                          </p>
-                        </div>
+        {/* Book Cards */}
+        <div className='flex flex-col gap-4'>
+          {booksQuery.isLoading ? (
+            <div className='space-y-4'>
+              <Skeleton className='h-32 w-full rounded-2xl' />
+              <Skeleton className='h-32 w-full rounded-2xl' />
+              <Skeleton className='h-32 w-full rounded-2xl' />
+            </div>
+          ) : filteredBooks.length === 0 ? (
+            <div className='p-12 text-center text-neutral-500 bg-white rounded-2xl border border-neutral-200'>
+              No books found.
+            </div>
+          ) : (
+            filteredBooks.map((book) => (
+              <div
+                key={book.id}
+                className='flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white border border-neutral-200 rounded-2xl gap-4 shadow-sm'
+              >
+                {/* Info block */}
+                <div className='flex gap-4'>
+                  <div className='h-24 w-16 shrink-0 overflow-hidden rounded bg-neutral-100 border border-neutral-200 shadow-sm'>
+                    {book.coverImage ? (
+                      <img
+                        src={book.coverImage}
+                        alt={book.title}
+                        className='h-full w-full object-cover'
+                      />
+                    ) : (
+                      <div className='flex h-full w-full items-center justify-center text-neutral-300'>
+                        📚
                       </div>
-                    </td>
-                    <td className='px-6 py-4'>
-                      {book.availableCopies > 0 ? (
-                        <Badge className='bg-green-100 text-green-700 hover:bg-green-100 border-none shadow-none font-medium'>
-                          Available
-                        </Badge>
-                      ) : (
-                        <Badge className='bg-orange-100 text-orange-700 hover:bg-orange-100 border-none shadow-none font-medium'>
-                          Borrowed
-                        </Badge>
-                      )}
-                    </td>
-                    <td className='px-6 py-4 text-right'>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant='ghost'
-                            className='h-8 w-8 p-0 text-neutral-500'
-                          >
-                            <MoreHorizontal className='h-4 w-4' />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align='end'>
-                          <DropdownMenuItem onClick={() => handleEdit(book)}>
-                            <Edit className='mr-2 h-4 w-4' /> Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => handleDeleteClick(book)}
-                            className='text-red-600 focus:text-red-700'
-                          >
-                            <Trash2 className='mr-2 h-4 w-4' /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                    )}
+                  </div>
+                  <div className='flex flex-col justify-center'>
+                    {book.category?.name && (
+                      <Badge className='w-fit bg-neutral-100 text-neutral-600 hover:bg-neutral-200 border-none rounded-md px-2 py-0 mb-1 font-medium'>
+                        {book.category.name}
+                      </Badge>
+                    )}
+                    <h3 className='font-semibold text-neutral-900 text-base line-clamp-1'>
+                      {book.title}
+                    </h3>
+                    <p className='text-sm text-neutral-500 mb-1'>
+                      {book.author?.name || 'Unknown'}
+                    </p>
+                    <div className='flex items-center gap-1 mt-auto'>
+                      <Star className='h-3.5 w-3.5 fill-yellow-400 text-yellow-400' />
+                      <span className='text-xs font-semibold text-neutral-700'>
+                        {book.rating ? book.rating.toFixed(1) : '0.0'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions block */}
+                <div className='flex items-center gap-2 sm:ml-auto self-end sm:self-center'>
+                  <Button
+                    variant='outline'
+                    onClick={() => handlePreview(book)}
+                    className='rounded-full px-5 text-sm h-9 border-neutral-200 text-neutral-700'
+                  >
+                    Preview
+                  </Button>
+                  <Button
+                    variant='outline'
+                    onClick={() => handleEdit(book)}
+                    className='rounded-full px-5 text-sm h-9 border-neutral-200 text-neutral-700'
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant='outline'
+                    onClick={() => handleDeleteClick(book)}
+                    className='rounded-full px-5 text-sm h-9 border-neutral-200 text-red-600 hover:text-red-700 hover:bg-red-50'
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Pagination */}
@@ -297,25 +273,122 @@ export default function BookListPage() {
       />
 
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Book</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{bookToDelete?.title}"? This
-              action cannot be undone.
+        <DialogContent className='sm:max-w-md rounded-3xl p-8 outline-none'>
+          <DialogHeader className='text-center space-y-3 mb-4'>
+            <DialogTitle className='text-xl font-bold text-center'>
+              Delete Data
+            </DialogTitle>
+            <DialogDescription className='text-center text-neutral-900 font-medium text-base'>
+              Once deleted, you won't be able to recover this data.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className='flex flex-row justify-center sm:justify-center gap-4 border-none mt-2'>
             <Button
               variant='outline'
               onClick={() => setIsDeleteDialogOpen(false)}
+              className='rounded-full px-8 py-2 min-w-[120px] font-medium border-neutral-300 text-neutral-700'
             >
               Cancel
             </Button>
-            <Button variant='destructive' onClick={confirmDelete}>
-              Delete
+            <Button
+              onClick={confirmDelete}
+              className='rounded-full px-8 py-2 min-w-[120px] font-medium bg-[#ec1f79] hover:bg-[#d5196c] text-white'
+            >
+              Confirm
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Modal */}
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent className='sm:max-w-2xl'>
+          <DialogHeader>
+            <DialogTitle>Book Details</DialogTitle>
+            <DialogDescription className='sr-only'>
+              Detailed information about the selected book.
+            </DialogDescription>
+          </DialogHeader>
+          {bookToPreview && (
+            <div className='flex flex-col md:flex-row gap-6 mt-4'>
+              <div className='w-full md:w-1/3 shrink-0'>
+                <div className='aspect-2/3 w-full overflow-hidden rounded-lg bg-neutral-100 border border-neutral-200'>
+                  {bookToPreview.coverImage ? (
+                    <img
+                      src={bookToPreview.coverImage}
+                      alt={bookToPreview.title}
+                      className='h-full w-full object-cover'
+                    />
+                  ) : (
+                    <div className='flex h-full w-full items-center justify-center text-neutral-300'>
+                      <Star className='h-8 w-8' />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className='flex-1 flex flex-col'>
+                <h2 className='text-2xl font-bold text-neutral-900 mb-1'>
+                  {bookToPreview.title}
+                </h2>
+                <p className='text-neutral-500 mb-4'>
+                  By{' '}
+                  <span className='font-medium text-neutral-700'>
+                    {bookToPreview.author?.name || 'Unknown Author'}
+                  </span>
+                </p>
+
+                <div className='grid grid-cols-2 gap-4 mb-6'>
+                  <div className='bg-neutral-50 p-3 rounded-lg border border-neutral-100'>
+                    <p className='text-xs text-neutral-500 uppercase tracking-wider mb-1'>
+                      Category
+                    </p>
+                    <p className='font-medium text-neutral-900'>
+                      {bookToPreview.category?.name || 'Uncategorized'}
+                    </p>
+                  </div>
+                  <div className='bg-neutral-50 p-3 rounded-lg border border-neutral-100'>
+                    <p className='text-xs text-neutral-500 uppercase tracking-wider mb-1'>
+                      Rating
+                    </p>
+                    <div className='flex items-center gap-1'>
+                      <Star className='h-4 w-4 fill-yellow-400 text-yellow-400' />
+                      <span className='font-medium text-neutral-900'>
+                        {bookToPreview.rating
+                          ? bookToPreview.rating.toFixed(1)
+                          : '0.0'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className='bg-neutral-50 p-3 rounded-lg border border-neutral-100'>
+                    <p className='text-xs text-neutral-500 uppercase tracking-wider mb-1'>
+                      Available
+                    </p>
+                    <p className='font-medium text-neutral-900'>
+                      {bookToPreview.availableCopies} Copies
+                    </p>
+                  </div>
+                  <div className='bg-neutral-50 p-3 rounded-lg border border-neutral-100'>
+                    <p className='text-xs text-neutral-500 uppercase tracking-wider mb-1'>
+                      Total
+                    </p>
+                    <p className='font-medium text-neutral-900'>
+                      {bookToPreview.totalCopies} Copies
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className='font-semibold text-neutral-900 mb-2'>
+                    Description
+                  </h3>
+                  <p className='text-sm text-neutral-600 leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto pr-2'>
+                    {bookToPreview.description ||
+                      'No description available for this book.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
