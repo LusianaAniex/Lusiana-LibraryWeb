@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppDispatch';
 import { setSearchQuery } from '@/store/uiSlice';
 import { useQuery } from '@tanstack/react-query';
@@ -41,7 +41,10 @@ function useBooks(params: {
       };
       if (q) searchParams.q = q;
       if (categoryId) searchParams.categoryId = String(categoryId);
-      const { data } = await api.get('/api/books', { params: searchParams });
+
+      const endpoint =
+        !q && !categoryId ? '/api/books/recommend' : '/api/books';
+      const { data } = await api.get(endpoint, { params: searchParams });
       // Backend: { success, message, data: { books: [...], pagination: { totalPages } } }
       const payload = data?.data;
       return {
@@ -211,7 +214,8 @@ export default function HomePage() {
           </h2>
           <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'>
             {popularAuthors.map((author) => (
-              <div
+              <Link
+                to={`/authors/${author.id}`}
                 key={author.id}
                 className='flex items-center gap-3 rounded-[32px] border border-neutral-100 bg-white p-2 pr-4 transition-all hover:border-neutral-200 hover:shadow-sm cursor-pointer'
               >
@@ -243,7 +247,7 @@ export default function HomePage() {
                     {author.bookCount || 0} books
                   </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </section>

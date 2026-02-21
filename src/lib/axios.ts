@@ -22,9 +22,30 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor: Handle 401 (Unauthorized) errors globally
+// Helper to sanitize blob URLs locally so they don't break frontend mapping
+const sanitizeBlobUrls = (data: any) => {
+  if (!data || typeof data !== 'object') return;
+  if (Array.isArray(data)) {
+    data.forEach(sanitizeBlobUrls);
+  } else {
+    for (const key in data) {
+      if (typeof data[key] === 'string' && data[key].startsWith('blob:')) {
+        data[key] = ''; // Change to empty string so fallback UI triggers
+      } else if (typeof data[key] === 'object') {
+        sanitizeBlobUrls(data[key]);
+      }
+    }
+  }
+};
+
+// Interceptor: Handle 401 (Unauthorized) errors globally and sanitize blob references
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response.data) {
+      sanitizeBlobUrls(response.data);
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');

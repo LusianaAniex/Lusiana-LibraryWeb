@@ -12,22 +12,11 @@ function useAuthorProfile(authorId: string) {
     queryFn: async () => {
       // Typically backends provide an author by ID.
       // E.g. /api/authors/:id  and /api/books?authorId=:id
-      const [authorRes, booksRes] = await Promise.all([
-        api.get(`/api/authors/${authorId}`),
-        api.get('/api/books', { params: { authorId, limit: 100 } }),
-      ]);
+      const res = await api.get(`/api/authors/${authorId}/books`);
+      const payload = res.data?.data;
 
-      const authorPayload = authorRes.data?.data;
-      const author = Array.isArray(authorPayload?.authors)
-        ? authorPayload.authors[0]
-        : authorPayload || null;
-
-      const booksPayload = booksRes.data?.data;
-      const books = Array.isArray(booksPayload?.books)
-        ? booksPayload.books
-        : Array.isArray(booksPayload)
-          ? booksPayload
-          : [];
+      const author = payload?.author || null;
+      const books = Array.isArray(payload?.books) ? payload.books : [];
 
       return { author, books };
     },

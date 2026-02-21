@@ -83,7 +83,7 @@ export function useBorrowFromCart() {
       return api.post('/api/loans/from-cart', {
         itemIds: payload.itemIds,
         borrowDate: payload.borrowDate,
-        days: payload.duration,
+        borrowDuration: payload.duration,
       });
     },
     onSuccess: () => {

@@ -63,30 +63,30 @@ export function CategoriesCarousel({
           ? Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className='flex flex-col items-center justify-center gap-3 rounded-2xl border border-neutral-100 bg-neutral-50 px-6 py-4 w-[140px] animate-pulse'
+                className='flex flex-col gap-2 rounded-2xl border border-neutral-100 bg-white p-2 animate-pulse w-[100px] h-[100px] md:w-[150px] md:h-[120px]'
               >
-                <div className='h-12 w-12 rounded-lg bg-neutral-200'></div>
-                <div className='h-4 w-16 rounded bg-neutral-200'></div>
+                <div className='flex-1 w-full rounded-xl bg-neutral-100'></div>
+                <div className='h-4 w-16 mx-auto md:mx-1 rounded bg-neutral-200 mt-1'></div>
               </div>
             ))
           : categories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => handleSelect(cat.id)}
-                className={`flex-none flex flex-col items-center justify-center gap-3 rounded-2xl border transition-all cursor-pointer px-6 py-4 w-[140px] md:w-[160px] ${
+                className={`flex-none flex flex-col gap-2 rounded-2xl border transition-all cursor-pointer p-2 w-[100px] h-[100px] md:w-[150px] md:h-[120px] ${
                   selectedCategoryId === cat.id
-                    ? 'border-primary-600 bg-primary-50 shadow-sm'
-                    : 'border-neutral-100 bg-white hover:border-primary-200 hover:bg-neutral-50 hover:shadow-sm'
+                    ? 'border-primary-600 bg-white shadow-sm ring-1 ring-primary-600'
+                    : 'border-neutral-100 bg-white hover:border-primary-200 hover:shadow-sm'
                 }`}
               >
-                <div className='flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50/50'>
+                <div className='flex flex-1 w-full items-center justify-center rounded-xl bg-blue-50/50 group-hover:bg-blue-50 transition-colors'>
                   <img
                     src={getCategoryIcon(cat.name)}
                     alt={cat.name}
-                    className='h-10 w-10 object-contain drop-shadow-sm'
+                    className='h-8 w-8 md:h-10 md:w-10 object-contain drop-shadow-sm transition-transform group-hover:scale-105'
                   />
                 </div>
-                <span className='text-sm font-semibold text-neutral-800 text-center leading-tight'>
+                <span className='text-xs font-semibold text-neutral-800 text-center md:text-left leading-tight w-full px-1 mb-1 truncate'>
                   {cat.name}
                 </span>
               </button>
