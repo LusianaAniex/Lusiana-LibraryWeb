@@ -94,81 +94,137 @@ export default function AdminAuthorsPage() {
           </Button>
         </div>
 
-        {/* Table */}
+        {/* Table / Grid */}
         <div className='rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden'>
-          <table className='w-full text-left text-sm'>
-            <thead className='bg-neutral-50 border-b border-neutral-200'>
-              <tr>
-                <th className='px-6 py-4 font-semibold text-neutral-900'>
-                  Author Profile
-                </th>
-                <th className='px-6 py-4 font-semibold text-neutral-900'>
-                  Total Books
-                </th>
-                <th className='px-6 py-4 font-semibold text-neutral-900 text-right'>
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className='divide-y divide-neutral-100'>
-              {authorsQuery.isLoading ? (
+          {/* Desktop Table */}
+          <div className='hidden md:block overflow-x-auto'>
+            <table className='w-full text-left text-sm whitespace-nowrap'>
+              <thead className='bg-neutral-50 border-b border-neutral-200'>
                 <tr>
-                  <td colSpan={3} className='p-6'>
-                    <div className='flex flex-col gap-2'>
-                      <Skeleton className='h-12 w-full' />
-                      <Skeleton className='h-12 w-full' />
-                      <Skeleton className='h-12 w-full' />
-                    </div>
-                  </td>
+                  <th className='px-6 py-4 font-semibold text-neutral-900'>
+                    Author Profile
+                  </th>
+                  <th className='px-6 py-4 font-semibold text-neutral-900'>
+                    Total Books
+                  </th>
+                  <th className='px-6 py-4 font-semibold text-neutral-900 text-right'>
+                    Action
+                  </th>
                 </tr>
-              ) : filteredAuthors.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className='p-12 text-center text-neutral-500'>
-                    No authors found.
-                  </td>
-                </tr>
-              ) : (
-                filteredAuthors.map((author) => (
-                  <tr
-                    key={author.id}
-                    className='hover:bg-neutral-50 transition-colors'
-                  >
-                    <td className='px-6 py-4'>
-                      <div className='flex items-center gap-4'>
-                        <div className='h-12 w-12 shrink-0 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100'>
-                          {(author as any).profilePhoto ? (
-                            <img
-                              src={(author as any).profilePhoto}
-                              alt={author.name}
-                              className='h-full w-full object-cover'
-                            />
-                          ) : (
-                            <div className='flex h-full w-full items-center justify-center text-neutral-400 font-bold'>
-                              {author.name.charAt(0)}
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <p className='font-medium text-neutral-900'>
-                            {author.name}
-                          </p>
-                          <p className='text-xs text-neutral-500 line-clamp-1 max-w-sm'>
-                            {author.bio || 'No biography available'}
-                          </p>
-                        </div>
+              </thead>
+              <tbody className='divide-y divide-neutral-100'>
+                {authorsQuery.isLoading ? (
+                  <tr>
+                    <td colSpan={3} className='p-6'>
+                      <div className='flex flex-col gap-2'>
+                        <Skeleton className='h-12 w-full' />
+                        <Skeleton className='h-12 w-full' />
+                        <Skeleton className='h-12 w-full' />
                       </div>
                     </td>
-                    <td className='px-6 py-4'>
-                      <span className='inline-flex items-center justify-center bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full font-medium text-xs border border-blue-200'>
-                        {author.bookCount || 0} Books
-                      </span>
+                  </tr>
+                ) : filteredAuthors.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={3}
+                      className='p-12 text-center text-neutral-500'
+                    >
+                      No authors found.
                     </td>
-                    <td className='px-6 py-4 text-right'>
+                  </tr>
+                ) : (
+                  filteredAuthors.map((author) => (
+                    <tr
+                      key={author.id}
+                      className='hover:bg-neutral-50 transition-colors'
+                    >
+                      <td className='px-6 py-4'>
+                        <div className='flex items-center gap-4'>
+                          <div className='h-12 w-12 shrink-0 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100'>
+                            {(author as any).profilePhoto ? (
+                              <img
+                                src={(author as any).profilePhoto}
+                                alt={author.name}
+                                className='h-full w-full object-cover'
+                              />
+                            ) : (
+                              <div className='flex h-full w-full items-center justify-center text-neutral-400 font-bold'>
+                                {author.name.charAt(0)}
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <p className='font-medium text-neutral-900 whitespace-nowrap'>
+                              {author.name}
+                            </p>
+                            <p className='text-xs text-neutral-500 line-clamp-1 max-w-[200px] sm:max-w-sm'>
+                              {author.bio || 'No biography available'}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className='px-6 py-4'>
+                        <span className='inline-flex items-center justify-center bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full font-medium text-xs border border-blue-200'>
+                          {author.bookCount || 0} Books
+                        </span>
+                      </td>
+                      <td className='px-6 py-4 text-right'>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant='ghost'
+                              className='h-8 w-8 p-0 text-neutral-500'
+                            >
+                              <MoreHorizontal className='h-4 w-4' />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align='end'>
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(author)}
+                            >
+                              <Edit className='mr-2 h-4 w-4' /> Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteClick(author)}
+                              className='text-red-600 focus:text-red-700'
+                            >
+                              <Trash2 className='mr-2 h-4 w-4' /> Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card Grid */}
+          <div className='md:hidden p-4'>
+            {authorsQuery.isLoading ? (
+              <div className='grid grid-cols-2 gap-4'>
+                <Skeleton className='h-32 w-full rounded-xl' />
+                <Skeleton className='h-32 w-full rounded-xl' />
+              </div>
+            ) : filteredAuthors.length === 0 ? (
+              <div className='p-8 text-center text-neutral-500'>
+                No authors found.
+              </div>
+            ) : (
+              <div className='grid grid-cols-2 gap-4'>
+                {filteredAuthors.map((author) => (
+                  <div
+                    key={author.id}
+                    className='relative flex flex-col items-center p-4 border border-neutral-200 rounded-xl bg-neutral-50 shadow-sm text-center'
+                  >
+                    <div className='absolute top-2 right-2'>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant='ghost'
-                            className='h-8 w-8 p-0 text-neutral-500'
+                            className='h-8 w-8 p-0 text-neutral-500 hover:bg-neutral-200'
                           >
                             <MoreHorizontal className='h-4 w-4' />
                           </Button>
@@ -186,12 +242,34 @@ export default function AdminAuthorsPage() {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                    </div>
+
+                    <div className='h-14 w-14 shrink-0 overflow-hidden rounded-full border border-neutral-200 bg-white mb-3'>
+                      {(author as any).profilePhoto ? (
+                        <img
+                          src={(author as any).profilePhoto}
+                          alt={author.name}
+                          className='h-full w-full object-cover'
+                        />
+                      ) : (
+                        <div className='flex h-full w-full items-center justify-center text-neutral-400 font-bold'>
+                          {author.name.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+
+                    <p className='font-medium text-neutral-900 line-clamp-1 mb-2'>
+                      {author.name}
+                    </p>
+
+                    <span className='inline-flex items-center justify-center bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-md font-medium text-[10px] border border-blue-200'>
+                      {author.bookCount || 0} Books
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

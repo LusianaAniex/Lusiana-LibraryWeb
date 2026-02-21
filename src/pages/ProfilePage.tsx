@@ -17,7 +17,9 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { Camera, Clock, Calendar, Loader2 } from 'lucide-react';
 import StarRating from '@/components/books/StarRating';
-import type { Loan } from '@/types';
+import { GiveReviewModal } from '@/components/books/GiveReviewModal';
+import { Search } from 'lucide-react';
+import type { Loan, Book } from '@/types';
 
 // ── Fetch current user from /api/me (with Redux user as stable placeholder) ──
 function useMe() {
@@ -358,8 +360,25 @@ function ProfileTabContent({ user }: { user: any }) {
 // ─── Borrowed List Tab ───────────────────────────────────────────────────────
 
 function BorrowedListTabContent() {
-  const { data: loans = [], isLoading } = useMyLoans({ status: 'all' });
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentStatus = searchParams.get('loanStatus') || 'all';
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const { data: loans = [], isLoading } = useMyLoans({
+    status: currentStatus as any,
+    q: searchQuery,
+  });
+
   const returnBook = useReturnBook();
+  const [reviewBook, setReviewBook] = useState<Book | null>(null);
+
+  const handleStatusChange = (val: string) => {
+    setSearchParams((prev) => {
+      const p = new URLSearchParams(prev);
+      p.set('loanStatus', val);
+      return p;
+    });
+  };
 
   const getStatusBadge = (loan: Loan) => {
     const isOverdue =
@@ -388,9 +407,18 @@ function BorrowedListTabContent() {
 
   if (isLoading) {
     return (
-      <div className='space-y-3'>
-        {[...Array(4)].map((_, i) => (
-          <Skeleton key={i} className='h-24 w-full rounded-xl' />
+      <div className='space-y-4 pt-4'>
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className='bg-white p-4 rounded-xl border border-neutral-200 flex gap-4'
+          >
+            <Skeleton className='h-24 w-16 rounded-md shrink-0' />
+            <div className='flex-1 space-y-2'>
+              <Skeleton className='h-5 w-1/3' />
+              <Skeleton className='h-4 w-1/4' />
+            </div>
+          </div>
         ))}
       </div>
     );
@@ -398,65 +426,144 @@ function BorrowedListTabContent() {
 
   if (loans.length === 0) {
     return (
-      <div className='flex flex-col items-center gap-3 py-20 text-neutral-400'>
-        <Clock className='h-10 w-10' />
-        <p className='text-sm font-medium'>No borrowed books yet</p>
+      <div className='flex flex-col items-center gap-3 py-20 bg-white border border-neutral-200 rounded-xl text-neutral-400'>
+        <div className='mx-auto h-12 w-12 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-400 mb-3'>
+          <Clock className='h-6 w-6' />
+        </div>
+        <p className='text-sm font-medium'>
+          No borrowed books found matching your filter
+        </p>
       </div>
     );
   }
 
   return (
-    <div className='space-y-3'>
-      {loans.map((loan) => (
-        <div
-          key={loan.id}
-          className='flex items-start gap-4 bg-white border border-neutral-200 rounded-xl p-4 hover:shadow-sm transition-shadow'
-        >
-          {loan.book?.coverImage ? (
-            <img
-              src={loan.book.coverImage}
-              alt={loan.book.title}
-              className='h-20 w-14 object-cover rounded-lg shrink-0 shadow-sm'
-            />
-          ) : (
-            <div className='h-20 w-14 rounded-lg bg-neutral-100 shrink-0 flex items-center justify-center text-neutral-400 text-xs font-medium'>
-              No cover
+    <div className='space-y-6'>
+      <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4'>
+        <h2 className='text-xl font-bold text-neutral-900'>Borrowed List</h2>
+        <div className='relative w-full sm:w-64'>
+          <Search className='absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 h-4 w-4' />
+          <Input
+            placeholder='Search book'
+            className='pl-9 rounded-full h-10 border-neutral-200 focus-visible:ring-primary-600'
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <Tabs
+        value={currentStatus}
+        onValueChange={handleStatusChange}
+        className='w-full'
+      >
+        <TabsList className='bg-transparent p-0 h-auto gap-3 flex flex-wrap justify-start'>
+          {['all', 'active', 'returned', 'overdue'].map((status) => (
+            <TabsTrigger
+              key={status}
+              value={status}
+              className='rounded-full border border-neutral-200 px-4 py-1.5 text-xs font-semibold capitalize data-[state=active]:bg-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 hover:bg-neutral-50 shadow-none data-[state=active]:shadow-none'
+            >
+              {status}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+
+      <div className='grid gap-4'>
+        {loans.map((loan) => (
+          <div
+            key={loan.id}
+            className='bg-white p-4 sm:p-5 rounded-xl border border-neutral-200 shadow-sm flex flex-col sm:flex-row gap-5 transition-shadow hover:shadow-md'
+          >
+            {/* Cover */}
+            <div className='shrink-0'>
+              <div className='h-32 w-24 bg-neutral-100 rounded-md overflow-hidden shadow-inner border border-neutral-100'>
+                {loan.book?.coverImage ? (
+                  <img
+                    src={loan.book.coverImage}
+                    alt={loan.book.title}
+                    className='h-full w-full object-cover'
+                  />
+                ) : (
+                  <div className='flex h-full w-full items-center justify-center text-neutral-300'>
+                    <Clock className='h-8 w-8' />
+                  </div>
+                )}
+              </div>
             </div>
-          )}
-          <div className='flex-1 min-w-0'>
-            <p className='font-semibold text-neutral-900 truncate'>
-              {loan.book?.title ?? 'Unknown book'}
-            </p>
-            <p className='text-xs text-neutral-500 mt-0.5'>
-              {loan.book?.author?.name}
-            </p>
-            <div className='flex items-center gap-3 mt-2 text-xs text-neutral-500'>
-              <span className='flex items-center gap-1'>
-                <Calendar className='h-3 w-3' />
-                {format(new Date(loan.borrowedAt), 'dd MMM yyyy')}
-              </span>
-              <span className='flex items-center gap-1'>
-                <Clock className='h-3 w-3' />
-                Due {format(new Date(loan.dueAt), 'dd MMM yyyy')}
-              </span>
-            </div>
-            <div className='flex items-center justify-between mt-2'>
-              {getStatusBadge(loan)}
-              {loan.status === 'BORROWED' && (
-                <Button
-                  size='sm'
-                  variant='outline'
-                  className='h-7 text-xs'
-                  disabled={returnBook.isPending}
-                  onClick={() => returnBook.mutate(loan.id)}
-                >
-                  Return
-                </Button>
-              )}
+
+            {/* Info */}
+            <div className='flex-1 flex flex-col'>
+              <div className='flex justify-between items-start mb-2'>
+                <div>
+                  <h3 className='font-semibold text-lg text-neutral-900 line-clamp-1'>
+                    {loan.book?.title ?? 'Unknown book'}
+                  </h3>
+                  <p className='text-sm text-neutral-500'>
+                    {loan.book?.author?.name}
+                  </p>
+                </div>
+                {getStatusBadge(loan)}
+              </div>
+
+              <div className='grid grid-cols-2 gap-x-8 gap-y-2 text-sm text-neutral-600 mt-2 mb-4'>
+                <div className='flex items-center gap-2'>
+                  <Calendar className='h-4 w-4 text-neutral-400' />
+                  <span>
+                    Borrowed:{' '}
+                    <span className='font-medium text-neutral-900'>
+                      {format(new Date(loan.borrowedAt), 'MMM d, yyyy')}
+                    </span>
+                  </span>
+                </div>
+                <div className='flex items-center gap-2'>
+                  <Clock className='h-4 w-4 text-neutral-400' />
+                  <span>
+                    Due:{' '}
+                    <span
+                      className={`font-medium ${new Date(loan.dueAt) < new Date() && loan.status !== 'RETURNED' ? 'text-red-600' : 'text-neutral-900'}`}
+                    >
+                      {format(new Date(loan.dueAt), 'MMM d, yyyy')}
+                    </span>
+                  </span>
+                </div>
+              </div>
+
+              <div className='mt-auto flex justify-end gap-2'>
+                {loan.status !== 'RETURNED' && (
+                  <Button
+                    size='sm'
+                    onClick={() => returnBook.mutate(loan.id)}
+                    disabled={returnBook.isPending}
+                    className='bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-50 shadow-sm'
+                  >
+                    {returnBook.isPending ? 'Processing...' : 'Return Book'}
+                  </Button>
+                )}
+                {loan.book && (
+                  <Button
+                    size='sm'
+                    variant='default'
+                    className='h-9 px-4 text-sm bg-blue-600 text-white hover:bg-blue-700'
+                    onClick={() => setReviewBook(loan.book!)}
+                  >
+                    Give Review
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+
+      {reviewBook && (
+        <GiveReviewModal
+          book={reviewBook}
+          isOpen={!!reviewBook}
+          onClose={() => setReviewBook(null)}
+        />
+      )}
     </div>
   );
 }

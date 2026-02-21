@@ -12,6 +12,7 @@ import {
   LogOut,
   LayoutDashboard,
   ShoppingCart,
+  Star,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -264,18 +265,18 @@ export default function Navbar() {
                   My Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => navigate('/my-loans')}
+                  onClick={() => navigate('/profile?tab=borrowed')}
                   className='cursor-pointer'
                 >
                   <BookOpen className='mr-2 h-4 w-4' />
-                  My Loans
+                  Borrowed List
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => navigate('/cart')}
+                  onClick={() => navigate('/profile?tab=reviews')}
                   className='cursor-pointer'
                 >
-                  <ShoppingCart className='mr-2 h-4 w-4' />
-                  My Cart
+                  <Star className='mr-2 h-4 w-4 fill-current' />
+                  Reviews
                 </DropdownMenuItem>
                 {profile?.role === 'ADMIN' && (
                   <>

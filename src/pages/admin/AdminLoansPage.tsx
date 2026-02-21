@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import type { Loan } from '@/types';
 
-const STATUS_OPTIONS = ['ALL', 'BORROWED', 'RETURNED', 'LATE'];
+const STATUS_OPTIONS = ['all', 'active', 'returned', 'overdue'];
 
 function useAdminLoans(params: { status?: string; q?: string; page?: number }) {
   return useQuery<{ loans: Loan[]; totalPages: number }>({
@@ -27,7 +27,7 @@ function useAdminLoans(params: { status?: string; q?: string; page?: number }) {
         page: String(params.page ?? 1),
         limit: '15',
       };
-      if (params.status && params.status !== 'ALL') p.status = params.status;
+      if (params.status && params.status !== 'all') p.status = params.status;
       if (params.q) p.q = params.q;
       const { data } = await api.get('/api/admin/loans', { params: p });
       const payload = data?.data;
@@ -83,11 +83,11 @@ function statusBadge(loan: Loan) {
 export default function AdminLoansPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
-  const statusFilter = searchParams.get('status') ?? 'ALL';
+  const statusFilter = searchParams.get('status') ?? 'all';
   const page = Number(searchParams.get('page') ?? 1);
 
   const { data, isLoading, isError } = useAdminLoans({
-    status: statusFilter === 'ALL' ? undefined : statusFilter,
+    status: statusFilter === 'all' ? undefined : statusFilter,
     q: search || undefined,
     page,
   });
@@ -141,11 +141,7 @@ export default function AdminLoansPage() {
                   : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-50'
               }`}
             >
-              {s === 'ALL'
-                ? 'All'
-                : s === 'LATE'
-                  ? 'Overdue'
-                  : s.charAt(0) + s.slice(1).toLowerCase()}
+              {s.charAt(0).toUpperCase() + s.slice(1)}
             </button>
           ))}
         </div>

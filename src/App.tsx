@@ -14,7 +14,6 @@ const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
 const BookExplorerPage = lazy(() => import('@/pages/BookExplorerPage'));
 const BookDetailPage = lazy(() => import('@/pages/BookDetailPage'));
 const AuthorDetailPage = lazy(() => import('@/pages/AuthorDetailPage'));
-const MyLoansPage = lazy(() => import('@/pages/MyLoansPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const CartPage = lazy(() => import('@/pages/CartPage'));
 const CheckoutPage = lazy(() => import('@/pages/CheckoutPage'));
@@ -54,14 +53,6 @@ function App() {
             <Route path='/books' element={<BookExplorerPage />} />
             <Route path='/books/:id' element={<BookDetailPage />} />
             <Route path='/authors/:id' element={<AuthorDetailPage />} />
-            <Route
-              path='/my-loans'
-              element={
-                <ProtectedRoute>
-                  <MyLoansPage />
-                </ProtectedRoute>
-              }
-            />
             <Route
               path='/profile'
               element={
