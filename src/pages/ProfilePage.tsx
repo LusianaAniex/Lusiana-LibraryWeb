@@ -369,6 +369,11 @@ function BorrowedListTabContent() {
     q: searchQuery,
   });
 
+  const { data: myReviews = [] } = useMyReviews();
+  const reviewedBookIds = new Set(
+    myReviews.map((r) => r.bookId ?? r.book?.id).filter((id) => id != null)
+  );
+
   const returnBook = useReturnBook();
   const [reviewBook, setReviewBook] = useState<Book | null>(null);
 
@@ -541,16 +546,30 @@ function BorrowedListTabContent() {
                     {returnBook.isPending ? 'Processing...' : 'Return Book'}
                   </Button>
                 )}
-                {loan.book && (
-                  <Button
-                    size='sm'
-                    variant='default'
-                    className='h-9 px-4 text-sm bg-blue-600 text-white hover:bg-blue-700'
-                    onClick={() => setReviewBook(loan.book!)}
-                  >
-                    Give Review
-                  </Button>
-                )}
+                {loan.book &&
+                  (() => {
+                    const safeBookId = loan.bookId ?? loan.book?.id;
+                    const isReviewedAndReturned =
+                      loan.status === 'RETURNED' &&
+                      safeBookId != null &&
+                      reviewedBookIds.has(safeBookId);
+
+                    return (
+                      <Button
+                        size='sm'
+                        variant='default'
+                        className={`h-9 px-4 text-sm ${
+                          isReviewedAndReturned
+                            ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed hover:bg-neutral-200'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
+                        onClick={() => setReviewBook(loan.book!)}
+                        disabled={isReviewedAndReturned}
+                      >
+                        {isReviewedAndReturned ? 'Reviewed' : 'Give Review'}
+                      </Button>
+                    );
+                  })()}
               </div>
             </div>
           </div>

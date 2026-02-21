@@ -169,22 +169,22 @@ export default function AdminLoansPage() {
           <table className='w-full text-sm'>
             <thead className='bg-neutral-50 border-b border-neutral-200'>
               <tr>
-                <th className='px-4 py-3 text-left font-semibold text-neutral-700'>
+                <th className='px-2 sm:px-4 py-3 text-left font-semibold text-neutral-700'>
                   Book
                 </th>
-                <th className='px-4 py-3 text-left font-semibold text-neutral-700 hidden sm:table-cell'>
+                <th className='px-2 sm:px-4 py-3 text-left font-semibold text-neutral-700 hidden sm:table-cell'>
                   Borrower
                 </th>
-                <th className='px-4 py-3 text-left font-semibold text-neutral-700 hidden md:table-cell'>
+                <th className='px-2 sm:px-4 py-3 text-left font-semibold text-neutral-700 hidden md:table-cell'>
                   Borrowed
                 </th>
-                <th className='px-4 py-3 text-left font-semibold text-neutral-700'>
+                <th className='px-2 sm:px-4 py-3 text-left font-semibold text-neutral-700'>
                   Due
                 </th>
-                <th className='px-4 py-3 text-left font-semibold text-neutral-700'>
+                <th className='px-2 sm:px-4 py-3 text-left font-semibold text-neutral-700'>
                   Status
                 </th>
-                <th className='px-4 py-3 text-right font-semibold text-neutral-700'>
+                <th className='px-2 sm:px-4 py-3 text-right font-semibold text-neutral-700'>
                   Action
                 </th>
               </tr>
@@ -195,9 +195,9 @@ export default function AdminLoansPage() {
                   key={loan.id}
                   className='hover:bg-neutral-50 transition-colors'
                 >
-                  <td className='px-4 py-3'>
-                    <div className='flex items-center gap-3'>
-                      <div className='h-12 w-9 shrink-0 rounded overflow-hidden bg-neutral-100 border border-neutral-200'>
+                  <td className='px-2 sm:px-4 py-3 min-w-0'>
+                    <div className='flex items-center gap-2 sm:gap-3'>
+                      <div className='hidden xs:block h-12 w-9 shrink-0 rounded overflow-hidden bg-neutral-100 border border-neutral-200'>
                         {loan.book?.coverImage ? (
                           <img
                             src={loan.book.coverImage}
@@ -210,39 +210,43 @@ export default function AdminLoansPage() {
                           </div>
                         )}
                       </div>
-                      <div>
-                        <p className='font-medium text-neutral-900 line-clamp-1'>
+                      <div className='min-w-0 wrap-break-word'>
+                        <p className='font-medium text-neutral-900 line-clamp-2 md:line-clamp-1 wrap-break-word'>
                           {loan.book?.title ?? `Loan #${loan.id}`}
                         </p>
-                        <p className='text-xs text-neutral-500'>
+                        <p className='text-[10px] sm:text-xs text-neutral-500 line-clamp-1'>
                           {loan.book?.author?.name}
                         </p>
                       </div>
                     </div>
                   </td>
-                  <td className='px-4 py-3 text-neutral-600 hidden sm:table-cell'>
+                  <td className='px-2 sm:px-4 py-3 text-neutral-600 hidden sm:table-cell min-w-[100px]'>
                     {loan.borrower?.name ?? `User #${loan.userId}`}
                   </td>
-                  <td className='px-4 py-3 text-neutral-500 hidden md:table-cell'>
+                  <td className='px-2 sm:px-4 py-3 text-neutral-500 hidden md:table-cell whitespace-nowrap'>
                     {format(new Date(loan.borrowedAt), 'MMM d, yyyy')}
                   </td>
                   <td
-                    className={`px-4 py-3 font-medium ${new Date(loan.dueAt) < new Date() && loan.status !== 'RETURNED' ? 'text-red-600' : 'text-neutral-700'}`}
+                    className={`px-2 sm:px-4 py-3 font-medium whitespace-nowrap ${new Date(loan.dueAt) < new Date() && loan.status !== 'RETURNED' ? 'text-red-600' : 'text-neutral-700'}`}
                   >
                     {format(new Date(loan.dueAt), 'MMM d, yyyy')}
                   </td>
-                  <td className='px-4 py-3'>{statusBadge(loan)}</td>
-                  <td className='px-4 py-3 text-right'>
+                  <td className='px-2 sm:px-4 py-3'>
+                    <div className='scale-[0.85] origin-left sm:scale-100 sm:origin-center'>
+                      {statusBadge(loan)}
+                    </div>
+                  </td>
+                  <td className='px-2 sm:px-4 py-3 text-right'>
                     {loan.status !== 'RETURNED' && (
                       <Button
                         size='sm'
                         variant='outline'
-                        className='h-7 text-xs gap-1'
+                        className='h-7 sm:h-8 text-[10px] sm:text-xs px-2 sm:px-3 gap-1 whitespace-nowrap'
                         disabled={returnLoan.isPending}
                         onClick={() => returnLoan.mutate(loan.id)}
                       >
-                        <CheckCircle className='h-3 w-3' />
-                        Return
+                        <CheckCircle className='h-3 w-3 shrink-0' />
+                        <span className='hidden xs:inline'>Return</span>
                       </Button>
                     )}
                   </td>

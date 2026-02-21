@@ -38,14 +38,14 @@ function StatCard({
       </div>
       <div>
         <h3 className='text-lg font-bold text-neutral-900'>{title}</h3>
-        <p className='text-sm text-neutral-500 mt-1 flex items-center gap-2'>
+        <div className='text-sm text-neutral-500 mt-1 flex items-center gap-2'>
           {value === undefined ? (
             <Skeleton className='h-4 w-8 inline-block' />
           ) : (
             <span className='font-semibold text-neutral-900'>{value}</span>
           )}
           <span>{label}</span>
-        </p>
+        </div>
       </div>
     </Link>
   );
