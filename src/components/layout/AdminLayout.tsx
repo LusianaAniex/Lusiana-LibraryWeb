@@ -69,7 +69,14 @@ export default function AdminLayout() {
       {/* Main */}
       <div className='flex-1 flex flex-col min-w-0'>
         {/* Mobile top bar */}
-        <div className='md:hidden h-14 bg-white border-b border-neutral-200 flex items-center gap-4 px-4'>
+        <div className='md:hidden h-14 bg-white border-b border-neutral-200 flex items-center gap-4 px-4 overflow-x-auto hide-scrollbar'>
+          <Link to='/' className='flex items-center gap-1.5 shrink-0 mr-2'>
+            <BookOpen className='h-4 w-4 text-primary-600' />
+            <span className='font-bold text-neutral-900 text-sm'>
+              Booky Admin
+            </span>
+          </Link>
+          <div className='w-px h-6 bg-neutral-200 shrink-0 mx-1'></div>
           {navItems.map((item) => {
             const active = item.exact
               ? location.pathname === item.href

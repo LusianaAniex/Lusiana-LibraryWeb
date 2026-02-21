@@ -54,10 +54,10 @@ export function CategoriesCarousel({
   };
 
   return (
-    <div className='relative w-full overflow-hidden pb-4 -mx-4 px-4 sm:mx-0 sm:px-0'>
+    <div className='relative w-full overflow-hidden pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 group'>
       <div
         ref={scrollContainerRef}
-        className='flex gap-4 min-w-max overflow-x-auto hide-scrollbar'
+        className='flex gap-4 overflow-x-auto hide-scrollbar scroll-smooth'
       >
         {isLoading
           ? Array.from({ length: 6 }).map((_, i) => (
@@ -73,7 +73,7 @@ export function CategoriesCarousel({
               <button
                 key={cat.id}
                 onClick={() => handleSelect(cat.id)}
-                className={`flex flex-col items-center justify-center gap-3 rounded-2xl border transition-all cursor-pointer px-6 py-4 w-[140px] md:w-[160px] ${
+                className={`flex-none flex flex-col items-center justify-center gap-3 rounded-2xl border transition-all cursor-pointer px-6 py-4 w-[140px] md:w-[160px] ${
                   selectedCategoryId === cat.id
                     ? 'border-primary-600 bg-primary-50 shadow-sm'
                     : 'border-neutral-100 bg-white hover:border-primary-200 hover:bg-neutral-50 hover:shadow-sm'
@@ -92,17 +92,17 @@ export function CategoriesCarousel({
               </button>
             ))}
       </div>
-      {/* Mobile-only visible arrows */}
-      <div className='flex sm:hidden items-center justify-between w-full absolute top-1/2 -translate-y-1/2 left-0 right-0 px-2 pointer-events-none'>
+      {/* Navigation arrows (visible on mobile, and on hover for desktop) */}
+      <div className='flex items-center justify-between w-full absolute top-1/2 -translate-y-1/2 left-0 right-0 px-2 pointer-events-none opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200'>
         <button
           onClick={() => scroll('left')}
-          className='pointer-events-auto h-8 w-8 rounded-full bg-white/90 shadow text-neutral-700 flex items-center justify-center'
+          className='pointer-events-auto h-8 w-8 rounded-full bg-white/90 shadow text-neutral-700 flex items-center justify-center hover:bg-white hover:scale-105 transition-all'
         >
           <ChevronLeft className='w-5 h-5' />
         </button>
         <button
           onClick={() => scroll('right')}
-          className='pointer-events-auto h-8 w-8 rounded-full bg-white/90 shadow text-neutral-700 flex items-center justify-center'
+          className='pointer-events-auto h-8 w-8 rounded-full bg-white/90 shadow text-neutral-700 flex items-center justify-center hover:bg-white hover:scale-105 transition-all'
         >
           <ChevronRight className='w-5 h-5' />
         </button>

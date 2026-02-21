@@ -23,9 +23,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { setSearchQuery } from '@/store/uiSlice';
+import { useDebounce } from '@/hooks/useDebounce';
+import type { Book } from '@/types';
 
 // Live profile — same ['me'] key as ProfilePage so the cache is shared
 function useLiveProfile() {
@@ -58,8 +60,52 @@ export default function Navbar() {
   // Cart badge
   const cartCount = useCartCount();
 
+  // Search-as-you-type suggestions
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const mobileSearchContainerRef = useRef<HTMLFormElement>(null);
+
+  const { data: searchResults, isFetching: isSearching } = useQuery<{
+    books: Book[];
+  }>({
+    queryKey: ['search-books', debouncedSearchQuery],
+    queryFn: async () => {
+      if (!debouncedSearchQuery?.trim()) return { books: [] };
+      const { data } = await api.get('/api/books', {
+        params: { q: debouncedSearchQuery.trim(), limit: 5 },
+      });
+      const payload = data?.data;
+      return {
+        books: Array.isArray(payload?.books)
+          ? payload.books
+          : Array.isArray(payload)
+            ? payload
+            : [],
+      };
+    },
+    enabled: !!debouncedSearchQuery?.trim() && showSuggestions,
+  });
+
+  // Handle clicking outside to close suggestions
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target as Node) &&
+        mobileSearchContainerRef.current &&
+        !mobileSearchContainerRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setSearchQuery(e.target.value));
+    setShowSuggestions(true);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -84,14 +130,75 @@ export default function Navbar() {
           onSubmit={handleSearchSubmit}
           className='hidden sm:flex flex-1 max-w-md mx-4'
         >
-          <div className='relative w-full'>
+          <div className='relative w-full' ref={searchContainerRef}>
             <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400' />
             <Input
               placeholder='Search books...'
               value={searchQuery}
               onChange={handleSearch}
+              onFocus={() => setShowSuggestions(true)}
               className='h-10 pl-9 rounded-lg border-neutral-200 bg-neutral-50 text-sm placeholder:text-neutral-400 focus-visible:ring-primary-600'
             />
+
+            {/* Desktop Suggestions Dropdown */}
+            {showSuggestions && debouncedSearchQuery?.trim() && (
+              <div className='absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-neutral-200 overflow-hidden z-50'>
+                {isSearching ? (
+                  <div className='p-4 text-sm text-neutral-500 text-center'>
+                    Searching...
+                  </div>
+                ) : searchResults?.books && searchResults.books.length > 0 ? (
+                  <div className='max-h-[60vh] overflow-y-auto'>
+                    {searchResults.books.map((book) => (
+                      <button
+                        key={book.id}
+                        type='button'
+                        onClick={() => {
+                          setShowSuggestions(false);
+                          setMobileSearchOpen(false);
+                          dispatch(setSearchQuery(book.title));
+                          navigate(`/books/${book.id}`);
+                        }}
+                        className='w-full text-left px-4 py-3 hover:bg-neutral-50 border-b border-neutral-100 last:border-0 flex items-center gap-3 transition-colors cursor-pointer'
+                      >
+                        {book.coverImage ? (
+                          <img
+                            src={book.coverImage}
+                            alt={book.title}
+                            className='w-8 h-12 object-cover rounded shadow-sm'
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className='w-8 h-12 bg-neutral-100 rounded flex items-center justify-center shrink-0'>
+                            <BookOpen size={14} className='text-neutral-400' />
+                          </div>
+                        )}
+                        <div className='flex-1 min-w-0'>
+                          <p className='text-sm font-medium text-neutral-900 truncate'>
+                            {book.title}
+                          </p>
+                          <p className='text-xs text-neutral-500 truncate'>
+                            {book.author?.name || 'Unknown Author'}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                    <button
+                      type='submit'
+                      className='w-full text-center py-2 text-xs font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 transition-colors cursor-pointer'
+                    >
+                      View all results for "{debouncedSearchQuery}"
+                    </button>
+                  </div>
+                ) : (
+                  <div className='p-4 text-sm text-neutral-500 text-center'>
+                    No books found.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </form>
 
@@ -216,13 +323,14 @@ export default function Navbar() {
 
       {/* Mobile Search Modal Overlay */}
       {mobileSearchOpen && (
-        <div className='absolute inset-0 z-[100] h-16 bg-white sm:hidden flex items-center px-4'>
+        <div className='absolute inset-0 z-100 h-16 bg-white sm:hidden flex items-center px-4'>
           <form
+            ref={mobileSearchContainerRef}
             onSubmit={(e) => {
               handleSearchSubmit(e);
               setMobileSearchOpen(false);
             }}
-            className='w-full flex items-center gap-2'
+            className='w-full flex items-center gap-2 relative'
           >
             <div className='relative flex-1'>
               <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400' />
@@ -230,13 +338,84 @@ export default function Navbar() {
                 autoFocus
                 placeholder='Search book...'
                 value={searchQuery}
-                onChange={handleSearch}
+                onChange={(e) => {
+                  handleSearch(e);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
                 className='h-10 pl-9 rounded-full border-neutral-200 bg-neutral-50 text-sm'
               />
+
+              {/* Mobile Suggestions Dropdown */}
+              {showSuggestions && debouncedSearchQuery?.trim() && (
+                <div className='absolute top-full left-0 right-0 mt-3 bg-white rounded-xl shadow-xl border border-neutral-200 overflow-hidden z-110 mx-[-10px] w-[calc(100%+20px)]'>
+                  {isSearching ? (
+                    <div className='p-4 text-sm text-neutral-500 text-center'>
+                      Searching...
+                    </div>
+                  ) : searchResults?.books && searchResults.books.length > 0 ? (
+                    <div className='max-h-[60vh] overflow-y-auto'>
+                      {searchResults.books.map((book) => (
+                        <button
+                          key={book.id}
+                          type='button'
+                          onClick={() => {
+                            setShowSuggestions(false);
+                            setMobileSearchOpen(false);
+                            dispatch(setSearchQuery(book.title));
+                            navigate(`/books/${book.id}`);
+                          }}
+                          className='w-full text-left px-4 py-3 hover:bg-neutral-50 border-b border-neutral-100 last:border-0 flex items-center gap-3 transition-colors cursor-pointer'
+                        >
+                          {book.coverImage ? (
+                            <img
+                              src={book.coverImage}
+                              alt={book.title}
+                              className='w-10 h-14 object-cover rounded shadow-sm'
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <div className='w-10 h-14 bg-neutral-100 rounded flex items-center justify-center shrink-0'>
+                              <BookOpen
+                                size={16}
+                                className='text-neutral-400'
+                              />
+                            </div>
+                          )}
+                          <div className='flex-1 min-w-0'>
+                            <p className='text-sm font-medium text-neutral-900 truncate'>
+                              {book.title}
+                            </p>
+                            <p className='text-xs text-neutral-500 truncate'>
+                              {book.author?.name || 'Unknown Author'}
+                            </p>
+                          </div>
+                        </button>
+                      ))}
+                      <button
+                        type='submit'
+                        className='w-full text-center py-3 text-xs font-semibold text-primary-600 bg-primary-50 hover:bg-primary-100 transition-colors cursor-pointer'
+                      >
+                        View all results for "{debouncedSearchQuery}"
+                      </button>
+                    </div>
+                  ) : (
+                    <div className='p-4 text-sm text-neutral-500 text-center'>
+                      No books found.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
+
             <button
               type='button'
-              onClick={() => setMobileSearchOpen(false)}
+              onClick={() => {
+                setMobileSearchOpen(false);
+                setShowSuggestions(false);
+              }}
               className='p-2 text-neutral-500 cursor-pointer hover:bg-neutral-100 rounded-full'
             >
               <X size={20} />
